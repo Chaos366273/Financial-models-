@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-08-05T16:23:30",
+  "architecture": "B",
+  "ranked_signals": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\ranked_signals.csv",
+  "blend_weight_on_xgb": {
+    "n_rows": 58622,
+    "mean_w_xgb": 0.5906272087125002,
+    "median_w_xgb": 0.5906272087124987,
+    "std_w_xgb": 1.2972528646727716e-12,
+    "pct_xgb_heavy_gt_0_7": 0.0,
+    "pct_mid_0_3_to_0_7": 1.0,
+    "pct_lstm_heavy_lt_0_3": 0.0,
+    "histogram_w_xgb": {
+      "0.0-0.2": 0.0,
+      "0.2-0.4": 0.0,
+      "0.4-0.6": 1.0,
+      "0.6-0.8": 0.0,
+      "0.8-1.0": 0.0
+    }
+  },
+  "forecast_quality": {
+    "xgb": {
+      "n": 58622,
+      "mse": 0.009246191586445792,
+      "r2": -0.01047082394857557,
+      "dir_acc": 0.5061239807580772
+    },
+    "lstm": {
+      "n": 58622,
+      "mse": 0.010533322073304383,
+      "r2": -0.15113498728820662,
+      "dir_acc": 0.5069257275425608
+    },
+    "blend": {
+      "n": 58622,
+      "mse": 0.009385728956457158,
+      "r2": -0.025720177147539713,
+      "dir_acc": 0.5086656886493125
+    }
+  },
+  "counterfactual_monthly_books": {
+    "xgb_only_eq_top10": {
+      "months": 167,
+      "mean_ret": 0.008034937442709479,
+      "cum_ret": 1.6646827319725679,
+      "hit_rate": 0.5449101796407185
+    },
+    "lstm_only_eq_top10": {
+      "months": 167,
+      "mean_ret": 0.005148532990841774,
+      "cum_ret": 0.3253778358696888,
+      "hit_rate": 0.5209580838323353
+    },
+    "blend_eq_top10": {
+      "months": 167,
+      "mean_ret": 0.007357106171692068,
+      "cum_ret": 0.9159736451849549,
+      "hit_rate": 0.5389221556886228
+    },
+    "arch_b_weighted": {
+      "months": 167,
+      "mean_ret": 0.008930832968631017,
+      "cum_ret": 1.9907923796298488,
+      "hit_rate": 0.5269461077844312
+    },
+    "on_selected_longs": {
+      "n": 3340,
+      "mean_blend_w_xgb": 0.5906272087124979,
+      "mean_blend_w_lstm": 0.40937279128750215
+    }
+  },
+  "trading_ppo": {
+    "total_return": -0.01863165184538962,
+    "sharpe_ratio": 0.04016762465067525,
+    "max_drawdown": 0.02132012465352567,
+    "win_rate": 0.3333333333333333,
+    "volatility": 0.0807316103960611,
+    "total_trades": 21,
+    "steps_simulated": 31,
+    "final_portfolio_value": 100000.0
+  },
+  "trade_attribution": {
+    "n_trades": 21,
+    "n_buy": 12,
+    "n_close": 9,
+    "buy_avg_stage1_weight": 0.0060168485976945,
+    "buy_avg_blend_w_xgb": 0.5906272087124939,
+    "buy_avg_blend_w_lstm": 0.4093727912875061,
+    "close_pnl_sum": -1846.6714962994538,
+    "note": "Trades have no market calendar date; tags use per-ticker averages from Stage-1 ranked_signals (not the exact month of the fill)."
+  },
+  "paths": {
+    "ranked_signals": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\ranked_signals.csv",
+    "trade_attribution_csv": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\trade_attribution.csv",
+    "attribution_json": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\attribution_report.json",
+    "attribution_md": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\attribution_report.md"
+  },
+  "interpretation": {
+    "blend": "y_pred = w*xgb + (1-w)*lstm. High mean_w_xgb => book is XGB-driven; low => LSTM-driven. Trading PPO does not choose the leg.",
+    "books_vs_ppo": "Monthly book cum returns span Stage-1 test months. Trading PPO return is a short daily execution window (often 1k-timestep smoke) \u2014 compare directionally, not as like-for-like total return."
+  }
+}

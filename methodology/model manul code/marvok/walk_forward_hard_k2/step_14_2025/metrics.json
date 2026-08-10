@@ -1,0 +1,19 @@
+{
+  "step": 14,
+  "eval_year": 2025,
+  "train_start": 2015,
+  "train_end": 2024,
+  "n_train": 55304,
+  "n_eval": 4749,
+  "mse": 0.009322244718078175,
+  "mae": 0.0644514811444053,
+  "rmse": 0.0965517722161441,
+  "r2": -0.029515195261205607,
+  "n_obs": 4749,
+  "ic_mean": null,
+  "ic_ir": null,
+  "long_short_mean": 0.0009583576959295835,
+  "n_months": 11,
+  "fit_mode": "regime_hard_ols",
+  "status": "ok"
+}

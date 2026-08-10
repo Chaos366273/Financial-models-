@@ -1,0 +1,19 @@
+{
+  "step": 10,
+  "eval_year": 2021,
+  "train_start": 2011,
+  "train_end": 2020,
+  "n_train": 55289,
+  "n_eval": 5593,
+  "mse": 0.01042137477747862,
+  "mae": 0.06823643869071482,
+  "rmse": 0.10208513494862326,
+  "r2": -0.13908282132414818,
+  "n_obs": 5593,
+  "ic_mean": 0.04357630066818658,
+  "ic_ir": null,
+  "long_short_mean": -0.014472119956175486,
+  "n_months": 1,
+  "fit_mode": "regime_wls",
+  "status": "ok"
+}

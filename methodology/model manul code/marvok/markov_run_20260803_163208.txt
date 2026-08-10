@@ -1,0 +1,36 @@
+2026-08-03 16:32:08 - Log file: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_run_20260803_163208.txt
+2026-08-03 16:32:24 - Panel rows=124445 | months 2002-04-01 -> 2025-11-01 | factors=['MKT_RF', 'SMB', 'HML', 'RMW', 'CMA'] | stock_level=True
+2026-08-03 16:32:24 - [step_01_2012] train 2002-2011 (48071 rows) -> eval 2012 (5400 rows)
+2026-08-03 16:32:25 -   RMSE=0.1072 IC=n/a n=5400 mode=regime_wls
+2026-08-03 16:32:26 - [step_02_2013] train 2003-2012 (50189 rows) -> eval 2013 (5387 rows)
+2026-08-03 16:32:26 -   RMSE=0.0987 IC=-0.0633 n=5387 mode=regime_wls
+2026-08-03 16:32:27 - [step_03_2014] train 2004-2013 (50946 rows) -> eval 2014 (5534 rows)
+2026-08-03 16:32:27 -   RMSE=2.9362 IC=n/a n=5534 mode=regime_wls
+2026-08-03 16:32:28 - [step_04_2015] train 2005-2014 (51744 rows) -> eval 2015 (5627 rows)
+2026-08-03 16:32:28 -   RMSE=0.1027 IC=0.0420 n=5627 mode=regime_wls
+2026-08-03 16:32:28 - [step_05_2016] train 2006-2015 (52637 rows) -> eval 2016 (5593 rows)
+2026-08-03 16:32:29 -   RMSE=0.1083 IC=n/a n=5593 mode=regime_wls
+2026-08-03 16:32:29 - [step_06_2017] train 2007-2016 (53478 rows) -> eval 2017 (5562 rows)
+2026-08-03 16:32:30 -   RMSE=0.0796 IC=-0.0261 n=5562 mode=regime_wls
+2026-08-03 16:32:30 - [step_07_2018] train 2008-2017 (54210 rows) -> eval 2018 (5580 rows)
+2026-08-03 16:32:31 -   RMSE=0.1069 IC=n/a n=5580 mode=regime_wls
+2026-08-03 16:32:31 - [step_08_2019] train 2009-2018 (54773 rows) -> eval 2019 (5593 rows)
+2026-08-03 16:32:32 -   RMSE=0.1004 IC=n/a n=5593 mode=regime_wls
+2026-08-03 16:32:33 - [step_09_2020] train 2010-2019 (55079 rows) -> eval 2020 (5611 rows)
+2026-08-03 16:32:34 -   RMSE=0.1740 IC=-0.0526 n=5611 mode=regime_wls
+2026-08-03 16:32:34 - [step_10_2021] train 2011-2020 (55289 rows) -> eval 2021 (5593 rows)
+2026-08-03 16:32:35 -   RMSE=0.0955 IC=-0.0436 n=5593 mode=regime_wls
+2026-08-03 16:32:35 - [step_11_2022] train 2012-2021 (55480 rows) -> eval 2022 (5510 rows)
+2026-08-03 16:32:36 -   RMSE=0.1191 IC=-0.0004 n=5510 mode=regime_wls
+2026-08-03 16:32:36 - [step_12_2023] train 2013-2022 (55590 rows) -> eval 2023 (5366 rows)
+2026-08-03 16:32:37 -   RMSE=0.1039 IC=0.0211 n=5366 mode=regime_wls
+2026-08-03 16:32:37 - [step_13_2024] train 2014-2023 (55569 rows) -> eval 2024 (5269 rows)
+2026-08-03 16:32:38 -   RMSE=0.0973 IC=n/a n=5269 mode=regime_wls
+2026-08-03 16:32:38 - [step_14_2025] train 2015-2024 (55304 rows) -> eval 2025 (4749 rows)
+2026-08-03 16:32:39 -   RMSE=0.0962 IC=0.0745 n=4749 mode=regime_wls
+2026-08-03 16:32:39 - Saved summary -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_baseline\walk_forward_baseline_summary.csv
+2026-08-03 16:32:41 - Saved pooled OOS predictions -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_baseline\pooled_oos_predictions.csv (76374 rows)
+2026-08-03 16:32:41 - POOLED OOS | RMSE=0.7973 MAE=0.0725 R2=-0.0005 IC=-0.0053 n=76374
+2026-08-03 16:32:41 - Appended tracker row -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_results_tracker.csv
+2026-08-03 16:32:42 - Wrote H1 tables -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\dissertation_table_h1.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\h1_comparison_template.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\h1_rmse_by_year.csv
+2026-08-03 16:32:42 - Done. Outputs under C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok

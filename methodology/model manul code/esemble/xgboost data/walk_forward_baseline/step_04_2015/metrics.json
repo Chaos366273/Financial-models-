@@ -1,0 +1,109 @@
+{
+  "step": 4,
+  "eval_year": 2015,
+  "train_start": 2005,
+  "train_end": 2014,
+  "experiment": "baseline",
+  "n_features": 19,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.029496808805357957,
+  "ic_std": 0.12288823566266224,
+  "long_short": 0.013966560905147399,
+  "topk_avg_return": 0.003605671747968924,
+  "topk_edge": 0.0036850625118694676,
+  "hit_rate": 0.5833333333333334,
+  "n_eval_rows": 5627,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "log_market_cap",
+      "importance": 0.12025949358940125
+    },
+    {
+      "feature": "MOM",
+      "importance": 0.07536875456571579
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.056165993213653564
+    },
+    {
+      "feature": "volume_trend",
+      "importance": 0.05243847146630287
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.051777999848127365
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.05168914049863815
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.04946378618478775
+    },
+    {
+      "feature": "revenue_growth",
+      "importance": 0.04757843166589737
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.04730707034468651
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.04700614511966705
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.0017573223449289799
+    },
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0015144050121307373
+    },
+    {
+      "feature": "volume_trend",
+      "mean_abs_shap": 0.0014870465965941548
+    },
+    {
+      "feature": "sma_20",
+      "mean_abs_shap": 0.0008689044625498354
+    },
+    {
+      "feature": "log_market_cap",
+      "mean_abs_shap": 0.0008392268791794777
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+2026-08-04 12:19:10 - Log file: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_run_20260804_121910.txt
+2026-08-04 12:19:10 - Configured k=2 window=rolling assign=soft train_probs=filtered market=ew_excess | WF_DIR=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_ew_k2
+2026-08-04 12:19:22 - Panel rows=124445 | months 2002-04-01 -> 2025-11-01 | factors=['MKT_RF', 'SMB', 'HML', 'RMW', 'CMA'] | stock_level=True | k=2 | window=rolling | assign=soft | train_probs=filtered | market=ew_excess
+2026-08-04 12:19:23 - [step_01_2012] rolling train 2002-2011 (48071 rows) -> eval 2012 (5400 rows)
+2026-08-04 12:19:24 -   RMSE=0.1069 IC=n/a n=5400 mode=regime_wls
+2026-08-04 12:19:24 - [step_02_2013] rolling train 2003-2012 (50189 rows) -> eval 2013 (5387 rows)
+2026-08-04 12:19:24 -   RMSE=0.0982 IC=-0.0794 n=5387 mode=regime_wls
+2026-08-04 12:19:25 - [step_03_2014] rolling train 2004-2013 (50946 rows) -> eval 2014 (5534 rows)
+2026-08-04 12:19:25 -   RMSE=2.9360 IC=-0.0361 n=5534 mode=regime_wls
+2026-08-04 12:19:25 - [step_04_2015] rolling train 2005-2014 (51744 rows) -> eval 2015 (5627 rows)
+2026-08-04 12:19:26 -   RMSE=0.1025 IC=0.0107 n=5627 mode=regime_wls
+2026-08-04 12:19:26 - [step_05_2016] rolling train 2006-2015 (52637 rows) -> eval 2016 (5593 rows)
+2026-08-04 12:19:27 -   RMSE=0.1082 IC=0.0727 n=5593 mode=regime_wls
+2026-08-04 12:19:27 - [step_06_2017] rolling train 2007-2016 (53478 rows) -> eval 2017 (5562 rows)
+2026-08-04 12:19:28 -   RMSE=0.0795 IC=-0.0275 n=5562 mode=regime_wls
+2026-08-04 12:19:28 - [step_07_2018] rolling train 2008-2017 (54210 rows) -> eval 2018 (5580 rows)
+2026-08-04 12:19:29 -   RMSE=0.1053 IC=n/a n=5580 mode=regime_wls
+2026-08-04 12:19:29 - [step_08_2019] rolling train 2009-2018 (54773 rows) -> eval 2019 (5593 rows)
+2026-08-04 12:19:32 -   RMSE=0.1005 IC=-0.0679 n=5593 mode=partial_fallback
+2026-08-04 12:19:32 - [step_09_2020] rolling train 2010-2019 (55079 rows) -> eval 2020 (5611 rows)
+2026-08-04 12:19:33 -   RMSE=0.1736 IC=-0.0553 n=5611 mode=regime_wls
+2026-08-04 12:19:33 - [step_10_2021] rolling train 2011-2020 (55289 rows) -> eval 2021 (5593 rows)
+2026-08-04 12:19:34 -   RMSE=0.0972 IC=n/a n=5593 mode=regime_wls
+2026-08-04 12:19:34 - [step_11_2022] rolling train 2012-2021 (55480 rows) -> eval 2022 (5510 rows)
+2026-08-04 12:19:35 -   RMSE=0.1183 IC=0.0740 n=5510 mode=regime_wls
+2026-08-04 12:19:35 - [step_12_2023] rolling train 2013-2022 (55590 rows) -> eval 2023 (5366 rows)
+2026-08-04 12:19:36 -   RMSE=0.1040 IC=-0.0037 n=5366 mode=regime_wls
+2026-08-04 12:19:36 - [step_13_2024] rolling train 2014-2023 (55569 rows) -> eval 2024 (5269 rows)
+2026-08-04 12:19:37 -   RMSE=0.0956 IC=n/a n=5269 mode=regime_wls
+2026-08-04 12:19:37 - [step_14_2025] rolling train 2015-2024 (55304 rows) -> eval 2025 (4749 rows)
+2026-08-04 12:19:37 -   RMSE=0.0955 IC=0.0745 n=4749 mode=regime_wls
+2026-08-04 12:19:37 - Saved summary -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_ew_k2\walk_forward_baseline_summary.csv
+2026-08-04 12:19:39 - Saved pooled OOS predictions -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_ew_k2\pooled_oos_predictions.csv (76374 rows)
+2026-08-04 12:19:39 - POOLED OOS | RMSE=0.7972 MAE=0.0721 R2=-0.0003 IC=-0.0057 n=76374
+2026-08-04 12:19:39 - Appended tracker row -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_results_tracker.csv
+2026-08-04 12:19:40 - Wrote window sensitivity -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity_summary.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity_by_year.csv
+2026-08-04 12:19:42 - Wrote assign sensitivity -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\assign_sensitivity.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\assign_sensitivity_summary.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\assign_sensitivity_by_year.csv
+2026-08-04 12:19:43 - Wrote prob sensitivity -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\prob_sensitivity.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\prob_sensitivity_summary.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\prob_sensitivity_by_year.csv
+2026-08-04 12:19:44 - Wrote market-series sensitivity -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\market_series_sensitivity.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\market_series_sensitivity_summary.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\market_series_sensitivity_by_year.csv
+2026-08-04 12:19:44 - Done. Outputs under C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok (active WF: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_ew_k2)

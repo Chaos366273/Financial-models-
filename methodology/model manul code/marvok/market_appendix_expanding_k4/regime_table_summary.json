@@ -1,0 +1,26 @@
+{
+  "k_regimes": 4,
+  "labels": [
+    "bear",
+    "bear_rally",
+    "bull_correction",
+    "bull"
+  ],
+  "mu_bear_mean": -0.06776601062208734,
+  "mu_bull_mean": 0.07572660952105545,
+  "persistence_bear_mean": 0.2917299177703264,
+  "persistence_bull_mean": 0.2401514511494558,
+  "duration_bear_mean": 1.5213132814570456,
+  "duration_bull_mean": 1.4065833926141578,
+  "market_rmse_mean": 0.044311099413035196,
+  "n_steps": 14,
+  "n_collapsed": 0,
+  "persist_bear_mean": 0.2917299177703264,
+  "mu_bear_rally_mean": -0.021906412922799594,
+  "persist_bear_rally_mean": 0.48595130367981204,
+  "duration_bear_rally_mean": 3.2193287073486516,
+  "mu_bull_correction_mean": 0.013501173192263152,
+  "persist_bull_correction_mean": 0.918635133047548,
+  "duration_bull_correction_mean": 15.025581119888015,
+  "persist_bull_mean": 0.2401514511494558
+}

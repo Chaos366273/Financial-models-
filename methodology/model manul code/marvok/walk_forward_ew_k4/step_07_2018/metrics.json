@@ -1,0 +1,19 @@
+{
+  "step": 7,
+  "eval_year": 2018,
+  "train_start": 2008,
+  "train_end": 2017,
+  "n_train": 54210,
+  "n_eval": 5580,
+  "mse": 0.010904966916340407,
+  "mae": 0.06661114014336583,
+  "rmse": 0.1044268495950175,
+  "r2": -0.05384930843596525,
+  "n_obs": 5580,
+  "ic_mean": null,
+  "ic_ir": null,
+  "long_short_mean": -0.0026851963557928964,
+  "n_months": 12,
+  "fit_mode": "regime_wls",
+  "status": "ok"
+}

@@ -1,0 +1,63 @@
+{
+  "formula": "target_excess_return ~ regime-weighted FF5 (k=4); y_pred = p0*X*b0 + p1*X*b1 + p2*X*b2 + p3*X*b3",
+  "k_regimes": 4,
+  "labels": [
+    "bear",
+    "bear_rally",
+    "bull_correction",
+    "bull"
+  ],
+  "n_train": 55289,
+  "n_eval": 5593,
+  "coefficients": {
+    "regime_0": {
+      "const": -0.02410355630824339,
+      "MKT_RF": -0.8407447764856302,
+      "SMB": 0.4984291240521483,
+      "HML": 0.028708951935137533,
+      "RMW": 0.31692658730724765,
+      "CMA": 1.6164393918221318
+    },
+    "regime_1": {
+      "const": 0.007360035515981029,
+      "MKT_RF": 0.10259962796542779,
+      "SMB": -0.7082258839471146,
+      "HML": -0.015543282454142568,
+      "RMW": 0.24777084467638874,
+      "CMA": 1.10568118598688
+    },
+    "regime_2": {
+      "const": 0.011713983595023012,
+      "MKT_RF": -0.02358812736632302,
+      "SMB": -0.7271517460567852,
+      "HML": 1.002242745163426,
+      "RMW": 0.503221678797627,
+      "CMA": -1.6588143964721438
+    },
+    "regime_3": {
+      "const": -0.08994638604548165,
+      "MKT_RF": 1.5453087595716966,
+      "SMB": -0.6146213380815752,
+      "HML": -0.4234657467466447,
+      "RMW": -1.2873254401049856,
+      "CMA": -1.6121337802529363
+    },
+    "pooled": null
+  },
+  "mode": "regime_wls",
+  "train_assign": "soft",
+  "allow_pooled_fallback": 0,
+  "used": {
+    "regime_0": 1,
+    "regime_1": 1,
+    "regime_2": 1,
+    "regime_3": 1
+  },
+  "fallback_reasons": [],
+  "train_month_counts": {
+    "bear": 34,
+    "bear_rally": 57,
+    "bull_correction": 99,
+    "bull": 13
+  }
+}

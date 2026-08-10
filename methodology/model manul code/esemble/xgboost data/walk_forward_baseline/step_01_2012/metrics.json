@@ -1,0 +1,109 @@
+{
+  "step": 1,
+  "eval_year": 2012,
+  "train_start": 2002,
+  "train_end": 2011,
+  "experiment": "baseline",
+  "n_features": 19,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.0330549095782793,
+  "ic_std": 0.07656370486121467,
+  "long_short": 0.00542786893184747,
+  "topk_avg_return": 0.014037753956985944,
+  "topk_edge": -0.003145245573298631,
+  "hit_rate": 0.4166666666666667,
+  "n_eval_rows": 5400,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "SMB",
+      "importance": 0.06551670283079147
+    },
+    {
+      "feature": "atr",
+      "importance": 0.05913528427481651
+    },
+    {
+      "feature": "debt_equity",
+      "importance": 0.058496247977018356
+    },
+    {
+      "feature": "eqy_turnover",
+      "importance": 0.05801184102892876
+    },
+    {
+      "feature": "MOM",
+      "importance": 0.05739849805831909
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.057225216180086136
+    },
+    {
+      "feature": "sma_15",
+      "importance": 0.05647067353129387
+    },
+    {
+      "feature": "bb_middle",
+      "importance": 0.0535416416823864
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.05335330218076706
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.05233250930905342
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.0022574111353605986
+    },
+    {
+      "feature": "volume_trend",
+      "mean_abs_shap": 0.0012388868490234017
+    },
+    {
+      "feature": "sma_20",
+      "mean_abs_shap": 0.0007651123451068997
+    },
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0006875591352581978
+    },
+    {
+      "feature": "bb_lower",
+      "mean_abs_shap": 0.0006516146240755916
+    }
+  ]
+}

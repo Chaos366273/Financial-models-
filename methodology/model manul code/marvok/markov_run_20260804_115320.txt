@@ -1,0 +1,37 @@
+2026-08-04 11:53:20 - Log file: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_run_20260804_115320.txt
+2026-08-04 11:53:20 - Configured k=2 window=expanding | WF_DIR=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_expanding_k2 | MARKET_DIR=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\market_appendix_expanding_k2
+2026-08-04 11:53:34 - Panel rows=124445 | months 2002-04-01 -> 2025-11-01 | factors=['MKT_RF', 'SMB', 'HML', 'RMW', 'CMA'] | stock_level=True | k=2 | window=expanding
+2026-08-04 11:53:34 - [step_01_2012] expanding train 2002-2011 (48071 rows) -> eval 2012 (5400 rows)
+2026-08-04 11:53:34 -   RMSE=0.1072 IC=n/a n=5400 mode=regime_wls
+2026-08-04 11:53:35 - [step_02_2013] expanding train 2002-2012 (53471 rows) -> eval 2013 (5387 rows)
+2026-08-04 11:53:35 -   RMSE=0.0982 IC=0.0794 n=5387 mode=regime_wls
+2026-08-04 11:53:35 - [step_03_2014] expanding train 2002-2013 (58858 rows) -> eval 2014 (5534 rows)
+2026-08-04 11:53:36 -   RMSE=2.9362 IC=-0.0076 n=5534 mode=regime_wls
+2026-08-04 11:53:36 - [step_04_2015] expanding train 2002-2014 (64392 rows) -> eval 2015 (5627 rows)
+2026-08-04 11:53:37 -   RMSE=0.1038 IC=-0.0489 n=5627 mode=regime_wls
+2026-08-04 11:53:37 - [step_05_2016] expanding train 2002-2015 (70019 rows) -> eval 2016 (5593 rows)
+2026-08-04 11:53:38 -   RMSE=0.1093 IC=n/a n=5593 mode=regime_wls
+2026-08-04 11:53:38 - [step_06_2017] expanding train 2002-2016 (75612 rows) -> eval 2017 (5562 rows)
+2026-08-04 11:53:39 -   RMSE=0.0796 IC=0.0536 n=5562 mode=regime_wls
+2026-08-04 11:53:39 - [step_07_2018] expanding train 2002-2017 (81174 rows) -> eval 2018 (5580 rows)
+2026-08-04 11:53:39 -   RMSE=0.1045 IC=n/a n=5580 mode=regime_wls
+2026-08-04 11:53:39 - [step_08_2019] expanding train 2002-2018 (86754 rows) -> eval 2019 (5593 rows)
+2026-08-04 11:53:40 -   RMSE=0.1004 IC=n/a n=5593 mode=regime_wls
+2026-08-04 11:53:40 - [step_09_2020] expanding train 2002-2019 (92347 rows) -> eval 2020 (5611 rows)
+2026-08-04 11:53:41 -   RMSE=0.1733 IC=-0.0553 n=5611 mode=regime_wls
+2026-08-04 11:53:41 - [step_10_2021] expanding train 2002-2020 (97958 rows) -> eval 2021 (5593 rows)
+2026-08-04 11:53:42 -   RMSE=0.0954 IC=0.0436 n=5593 mode=regime_wls
+2026-08-04 11:53:42 - [step_11_2022] expanding train 2002-2021 (103551 rows) -> eval 2022 (5510 rows)
+2026-08-04 11:53:43 -   RMSE=0.1180 IC=-0.0004 n=5510 mode=regime_wls
+2026-08-04 11:53:43 - [step_12_2023] expanding train 2002-2022 (109061 rows) -> eval 2023 (5366 rows)
+2026-08-04 11:53:44 -   RMSE=0.1004 IC=-0.0037 n=5366 mode=regime_wls
+2026-08-04 11:53:44 - [step_13_2024] expanding train 2002-2023 (114427 rows) -> eval 2024 (5269 rows)
+2026-08-04 11:53:45 -   RMSE=0.0962 IC=n/a n=5269 mode=regime_wls
+2026-08-04 11:53:45 - [step_14_2025] expanding train 2002-2024 (119696 rows) -> eval 2025 (4749 rows)
+2026-08-04 11:53:46 -   RMSE=0.0965 IC=-0.0745 n=4749 mode=regime_wls
+2026-08-04 11:53:46 - Saved summary -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_expanding_k2\walk_forward_baseline_summary.csv
+2026-08-04 11:53:48 - Saved pooled OOS predictions -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_expanding_k2\pooled_oos_predictions.csv (76374 rows)
+2026-08-04 11:53:48 - POOLED OOS | RMSE=0.7973 MAE=0.0720 R2=-0.0003 IC=-0.0015 n=76374
+2026-08-04 11:53:48 - Appended tracker row -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\markov_results_tracker.csv
+2026-08-04 11:53:49 - Wrote window sensitivity -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity.md | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity_summary.csv | C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\window_sensitivity_by_year.csv
+2026-08-04 11:53:49 - Done. Outputs under C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok (active WF: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_expanding_k2)

@@ -1,0 +1,93 @@
+{
+  "mode": "final_test_style_no_golden_lock",
+  "experiment": "sentiment",
+  "train_end": "2023-12",
+  "test_start": "2024-01",
+  "test_end": "2025-11-01",
+  "n_features": 24,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd",
+    "news_sentiment",
+    "news_publication_count",
+    "twitter_sentiment",
+    "twitter_publication_count",
+    "sentiment_proxy"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": -0.019680087961749887,
+  "ic_std": 0.10404746212152631,
+  "long_short": 0.0025118309758260303,
+  "topk_avg_return": 0.004791215348799157,
+  "topk_edge": -0.002060438748554027,
+  "hit_rate": 0.43478260869565216,
+  "n_eval_rows": 10018,
+  "n_months": 23,
+  "top10_importance": [
+    {
+      "feature": "MOM",
+      "importance": 0.056652408093214035
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.05116790533065796
+    },
+    {
+      "feature": "atr",
+      "importance": 0.04948502779006958
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.04903193935751915
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.04654857516288757
+    },
+    {
+      "feature": "log_market_cap",
+      "importance": 0.045555479824543
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.04390738904476166
+    },
+    {
+      "feature": "twitter_publication_count",
+      "importance": 0.04302773252129555
+    },
+    {
+      "feature": "revenue_growth",
+      "importance": 0.042868342250585556
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.04246855527162552
+    }
+  ],
+  "note": "Same fit protocol as xgb_return --final-test (train through 2023, score 2024-2025). This does NOT write or clear the golden-rule lock."
+}

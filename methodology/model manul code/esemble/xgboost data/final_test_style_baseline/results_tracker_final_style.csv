@@ -1,0 +1,2 @@
+run_id,date,model,experiment,evaluated_on,depth,lr,trees,test_ic,test_ls,test_topk_edge,test_hit_rate,n_test_rows,golden_lock_written
+20260804_153353,04/08/2026,XGB,baseline,test_final_style_no_lock,4,0.03,178,-0.01608102603791423,-0.0012704917606052733,-0.0014919986967712087,0.4782608695652174,10018,False

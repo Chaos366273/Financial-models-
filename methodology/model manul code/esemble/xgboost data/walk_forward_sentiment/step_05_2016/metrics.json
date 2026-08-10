@@ -1,0 +1,114 @@
+{
+  "step": 5,
+  "eval_year": 2016,
+  "train_start": 2006,
+  "train_end": 2015,
+  "experiment": "sentiment",
+  "n_features": 24,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd",
+    "news_sentiment",
+    "news_publication_count",
+    "twitter_sentiment",
+    "twitter_publication_count",
+    "sentiment_proxy"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.003404962876344585,
+  "ic_std": 0.10190090461610539,
+  "long_short": -0.01895563856776615,
+  "topk_avg_return": 0.02525687061701759,
+  "topk_edge": 0.007917614490081009,
+  "hit_rate": 0.6666666666666666,
+  "n_eval_rows": 5593,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "log_market_cap",
+      "importance": 0.08787964284420013
+    },
+    {
+      "feature": "MOM",
+      "importance": 0.06660791486501694
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.05946651101112366
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.05111127719283104
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.04557002708315849
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.043930504471063614
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.04387107864022255
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.04255491867661476
+    },
+    {
+      "feature": "HML",
+      "importance": 0.04185837507247925
+    },
+    {
+      "feature": "bb_middle",
+      "importance": 0.040178243070840836
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.0018014060333371162
+    },
+    {
+      "feature": "volume_trend",
+      "mean_abs_shap": 0.001348211313597858
+    },
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0013148877769708633
+    },
+    {
+      "feature": "sma_20",
+      "mean_abs_shap": 0.0012674425961449742
+    },
+    {
+      "feature": "CMA",
+      "mean_abs_shap": 0.0012203548103570938
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "step": 1,
+  "eval_year": 2012,
+  "train_start": 2002,
+  "train_end": 2011,
+  "n_train": 48071,
+  "n_eval": 5400,
+  "mse": 0.01147159323048762,
+  "mae": 0.06561739587510067,
+  "rmse": 0.1071055238094078,
+  "r2": -0.006904286324752151,
+  "n_obs": 5400,
+  "ic_mean": null,
+  "ic_ir": null,
+  "long_short_mean": 0.006552671399962652,
+  "n_months": 12,
+  "fit_mode": "regime_hard_ols",
+  "status": "ok"
+}

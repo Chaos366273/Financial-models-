@@ -1,0 +1,109 @@
+{
+  "step": 10,
+  "eval_year": 2021,
+  "train_start": 2011,
+  "train_end": 2020,
+  "experiment": "baseline",
+  "n_features": 19,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.03296567819886361,
+  "ic_std": 0.0750110153892564,
+  "long_short": 0.01672558103246089,
+  "topk_avg_return": 0.019756096887859325,
+  "topk_edge": 0.007804563433692278,
+  "hit_rate": 0.5833333333333334,
+  "n_eval_rows": 5593,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "MOM",
+      "importance": 0.08487875014543533
+    },
+    {
+      "feature": "log_market_cap",
+      "importance": 0.07685471326112747
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.05810464173555374
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.055255088955163956
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.05450519174337387
+    },
+    {
+      "feature": "HML",
+      "importance": 0.05444229766726494
+    },
+    {
+      "feature": "sma_20",
+      "importance": 0.05369427427649498
+    },
+    {
+      "feature": "bb_middle",
+      "importance": 0.051586709916591644
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.051016680896282196
+    },
+    {
+      "feature": "macd",
+      "importance": 0.04991815984249115
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0013528114650398493
+    },
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.0012433660449460149
+    },
+    {
+      "feature": "HML",
+      "mean_abs_shap": 0.0010095430770888925
+    },
+    {
+      "feature": "volume_trend",
+      "mean_abs_shap": 0.0009868342895060778
+    },
+    {
+      "feature": "debt_equity",
+      "mean_abs_shap": 0.0009321999386884272
+    }
+  ]
+}

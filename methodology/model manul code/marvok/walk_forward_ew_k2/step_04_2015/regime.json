@@ -1,0 +1,49 @@
+{
+  "k_regimes": 2,
+  "switching_variance": 1,
+  "labels": [
+    "bear",
+    "bull"
+  ],
+  "label_scheme": "ascending mean \u2192 bear/bull",
+  "regime_means": [
+    0.0013344076664554584,
+    0.009854981158684498
+  ],
+  "regime_means_named": {
+    "bear": 0.0013344076664554584,
+    "bull": 0.009854981158684498
+  },
+  "mu_bear": 0.0013344076664554584,
+  "mu_bull": 0.009854981158684498,
+  "transition_matrix": [
+    [
+      0.9187523747400608,
+      0.012726208510481563
+    ],
+    [
+      0.08124762525993923,
+      0.9872737914895184
+    ]
+  ],
+  "persistence": [
+    0.9187523747400608,
+    0.9872737914895184
+  ],
+  "typical_duration_months": [
+    12.308052042144672,
+    78.57799903061307
+  ],
+  "last_filtered_prob": [
+    0.007803385968242558,
+    0.9921966140307574
+  ],
+  "n_hist_months": 120,
+  "bull_index": 1,
+  "bear_index": 0,
+  "collapsed_regimes": 0,
+  "fit_mode": "regime_wls",
+  "train_prob_source": "filtered",
+  "train_assign": "soft",
+  "market_series": "ew_excess"
+}

@@ -1,0 +1,18 @@
+{
+  "k_regimes": 2,
+  "labels": [
+    "bear",
+    "bull"
+  ],
+  "mu_bear_mean": -0.0023536772719007968,
+  "mu_bull_mean": 0.020565172553294535,
+  "persistence_bear_mean": 0.8715426023751977,
+  "persistence_bull_mean": 0.780649452219503,
+  "duration_bear_mean": 36.20512748949552,
+  "duration_bull_mean": 47.56158472441583,
+  "market_rmse_mean": 0.04328726831754905,
+  "n_steps": 14,
+  "n_collapsed": 0,
+  "persist_bear_mean": 0.8715426023751977,
+  "persist_bull_mean": 0.780649452219503
+}

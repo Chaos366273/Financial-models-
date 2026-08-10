@@ -1,0 +1,46 @@
+{
+  "k_regimes": 2,
+  "switching_variance": 1,
+  "labels": [
+    "bear",
+    "bull"
+  ],
+  "label_scheme": "ascending mean \u2192 bear/bull",
+  "regime_means": [
+    -0.0027683787625502466,
+    0.011089890332493392
+  ],
+  "regime_means_named": {
+    "bear": -0.0027683787625502466,
+    "bull": 0.011089890332493392
+  },
+  "mu_bear": -0.0027683787625502466,
+  "mu_bull": 0.011089890332493392,
+  "transition_matrix": [
+    [
+      0.9710671583249068,
+      0.014679882350125406
+    ],
+    [
+      0.02893284167509321,
+      0.9853201176498746
+    ]
+  ],
+  "persistence": [
+    0.9710671583249068,
+    0.9853201176498746
+  ],
+  "typical_duration_months": [
+    34.56279930017545,
+    68.12043694556294
+  ],
+  "last_filtered_prob": [
+    0.02167389680059363,
+    0.9783261031984063
+  ],
+  "n_hist_months": 213,
+  "bull_index": 1,
+  "bear_index": 0,
+  "collapsed_regimes": 0,
+  "fit_mode": "regime_wls"
+}

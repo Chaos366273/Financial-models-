@@ -1,0 +1,17 @@
+{
+  "start_timesteps": 100000,
+  "total_timesteps": 100000,
+  "reward_overrides": {
+    "pnl_reward_scale": 72.0,
+    "base_trading_incentive": 0.18,
+    "sell_base_incentive": 0.18,
+    "sell_unconditional_base": 0.08,
+    "wrong_regime_buy_penalty": -0.15,
+    "profit_target_pct": 0.03,
+    "profit_target_5pct_bonus": 0.28,
+    "ent_coef": 0.15,
+    "learning_rate": 0.0005
+  },
+  "ranked_signals": "C:\\Users\\Faiaz\\Desktop\\Courses\\sem2\\dessertation\\methodology\\model manul code\\esemble\\saved_data\\ranked_signals.csv",
+  "note": "Written by stacked_ensemble.launch_trading_ppo \u2014 local esemble only"
+}

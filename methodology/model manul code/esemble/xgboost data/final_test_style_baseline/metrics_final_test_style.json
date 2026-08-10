@@ -1,0 +1,88 @@
+{
+  "mode": "final_test_style_no_golden_lock",
+  "experiment": "baseline",
+  "train_end": "2023-12",
+  "test_start": "2024-01",
+  "test_end": "2025-11-01",
+  "n_features": 19,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": -0.01608102603791423,
+  "ic_std": 0.10553793813699212,
+  "long_short": -0.0012704917606052733,
+  "topk_avg_return": 0.005359655400581973,
+  "topk_edge": -0.0014919986967712087,
+  "hit_rate": 0.4782608695652174,
+  "n_eval_rows": 10018,
+  "n_months": 23,
+  "top10_importance": [
+    {
+      "feature": "MOM",
+      "importance": 0.07049061357975006
+    },
+    {
+      "feature": "log_market_cap",
+      "importance": 0.06295550614595413
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.062124766409397125
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.057645365595817566
+    },
+    {
+      "feature": "debt_equity",
+      "importance": 0.0565306581556797
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.055134501308202744
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.054075177758932114
+    },
+    {
+      "feature": "HML",
+      "importance": 0.05357496440410614
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.05218910798430443
+    },
+    {
+      "feature": "atr",
+      "importance": 0.05196080356836319
+    }
+  ],
+  "note": "Same fit protocol as xgb_return --final-test (train through 2023, score 2024-2025). This does NOT write or clear the golden-rule lock."
+}

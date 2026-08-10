@@ -1,0 +1,114 @@
+{
+  "step": 13,
+  "eval_year": 2024,
+  "train_start": 2014,
+  "train_end": 2023,
+  "experiment": "sentiment",
+  "n_features": 24,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd",
+    "news_sentiment",
+    "news_publication_count",
+    "twitter_sentiment",
+    "twitter_publication_count",
+    "sentiment_proxy"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.03303970118904991,
+  "ic_std": 0.1106700256172022,
+  "long_short": 0.014598407781620084,
+  "topk_avg_return": 0.015504558018502507,
+  "topk_edge": 0.008702367739088729,
+  "hit_rate": 0.75,
+  "n_eval_rows": 5269,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "log_market_cap",
+      "importance": 0.07368948310613632
+    },
+    {
+      "feature": "MOM",
+      "importance": 0.05802593007683754
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.05231190845370293
+    },
+    {
+      "feature": "HML",
+      "importance": 0.048646654933691025
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.04610448703169823
+    },
+    {
+      "feature": "news_publication_count",
+      "importance": 0.04395556077361107
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.043482448905706406
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.042164262384176254
+    },
+    {
+      "feature": "sma_20",
+      "importance": 0.04157990217208862
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.04080517217516899
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0014062529662624002
+    },
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.001080127665773034
+    },
+    {
+      "feature": "CMA",
+      "mean_abs_shap": 0.0008837744826450944
+    },
+    {
+      "feature": "log_market_cap",
+      "mean_abs_shap": 0.0008677513687871397
+    },
+    {
+      "feature": "SMB",
+      "mean_abs_shap": 0.0008649039082229137
+    }
+  ]
+}

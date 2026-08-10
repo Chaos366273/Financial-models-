@@ -1,0 +1,166 @@
+2026-08-04 15:36:35 - Log file: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\logs\lstm_run_20260804_153635.txt
+2026-08-04 15:36:35 - Running ROLLING WALK-FORWARD validation (default). Use --single-val for old 2023-only val.
+2026-08-04 15:36:35 - Validation outputs: SAVE_DIR=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data | WF=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward | LOG=C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\logs
+2026-08-04 15:36:35 - PRIMARY LSTM: B_drop_bottom9 | seq=9 hidden=64 epochs=35 | walk_forward=True tune=False
+2026-08-04 15:36:35 - Robustness: contiguous=False warm_start=True liq_drop=0.2 sector_neutral=True members=True winsor=(0.01, 0.99) dropout=0.0 lr=0.001
+2026-08-04 15:36:35 - Preferred R3a WF ref: IC=0.0106 LS=+0.50% TopK-edge=+0.19% hit=51%
+2026-08-04 15:36:48 - Panel rows=124445 | months 2002-04-01 -> 2025-11-01 | members_filter=True
+2026-08-04 15:36:48 - Sentiment col news_sentiment               non-null=49.9%
+2026-08-04 15:36:48 - Sentiment col news_publication_count       non-null=44.5%
+2026-08-04 15:36:48 - Sentiment col twitter_sentiment            non-null=26.8%
+2026-08-04 15:36:48 - Sentiment col twitter_publication_count    non-null=38.1%
+2026-08-04 15:36:48 - Sentiment col sentiment_proxy              non-null=49.9%
+2026-08-04 15:36:49 - 
+2026-08-04 15:36:49 - ========================================================================
+2026-08-04 15:36:49 - LSTM WALK-FORWARD | baseline | window=rolling | seq=9 hidden=64 epochs=35 | seed=42 | steps=14 | honest_oos=True
+2026-08-04 15:36:49 - Warm-start=True | contiguous=False | liquidity_drop=0.2 | sector_neutral=True | members=True
+2026-08-04 15:36:59 - Torch device: cpu | AMP=False
+2026-08-04 15:36:59 - Features (19): log_market_cap, sma_20, SMB, MOM, bb_lower, debt_equity, CMA, sma_15, HML, macd_signal, volatility_30d, price_to_sma_20, atr, volume_trend, RMW, bb_middle, eqy_turnover, revenue_growth, macd
+2026-08-04 15:36:59 - Output: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_baseline
+2026-08-04 15:36:59 - ========================================================================
+2026-08-04 15:37:00 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 48071 -> 38427
+2026-08-04 15:37:00 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5400 -> 4319
+2026-08-04 15:39:41 - Step 01 | train 2002-2011 -> eval 2012 | IC=0.0066 LS=+1.02% TopK-edge=+0.09% hit=58% stocks=425 months=12 | Post-GFC recovery
+2026-08-04 15:39:42 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 50189 -> 40123
+2026-08-04 15:39:42 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5387 -> 4306
+2026-08-04 15:42:22 - Step 02 | train 2003-2012 -> eval 2013 | IC=0.0144 LS=+0.00% TopK-edge=-0.47% hit=50% stocks=417 months=12 | 
+2026-08-04 15:42:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 50946 -> 40727
+2026-08-04 15:42:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5534 -> 4425
+2026-08-04 15:45:06 - Step 03 | train 2004-2013 -> eval 2014 | IC=0.0261 LS=+1.09% TopK-edge=+0.29% hit=58% stocks=431 months=12 | 
+2026-08-04 15:45:06 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 51744 -> 41365
+2026-08-04 15:45:06 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5627 -> 4498
+2026-08-04 15:47:54 - Step 04 | train 2005-2014 -> eval 2015 | IC=0.0321 LS=+0.84% TopK-edge=+0.12% hit=42% stocks=441 months=12 | 
+2026-08-04 15:47:54 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 52637 -> 42077
+2026-08-04 15:47:54 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4471
+2026-08-04 15:50:45 - Step 05 | train 2006-2015 -> eval 2016 | IC=-0.0027 LS=+0.13% TopK-edge=+1.15% hit=75% stocks=436 months=12 | Brexit referendum year
+2026-08-04 15:50:45 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 53478 -> 42749
+2026-08-04 15:50:45 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5562 -> 4447
+2026-08-04 15:53:39 - Step 06 | train 2007-2016 -> eval 2017 | IC=0.0064 LS=-0.25% TopK-edge=-0.30% hit=50% stocks=433 months=12 | 
+2026-08-04 15:53:39 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 54210 -> 43334
+2026-08-04 15:53:39 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5580 -> 4460
+2026-08-04 15:56:36 - Step 07 | train 2008-2017 -> eval 2018 | IC=-0.0036 LS=+0.04% TopK-edge=+0.27% hit=50% stocks=428 months=12 | 
+2026-08-04 15:56:36 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 54773 -> 43786
+2026-08-04 15:56:36 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4472
+2026-08-04 15:59:34 - Step 08 | train 2009-2018 -> eval 2019 | IC=0.0148 LS=+0.62% TopK-edge=-0.25% hit=33% stocks=435 months=12 | 
+2026-08-04 15:59:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55079 -> 44033
+2026-08-04 15:59:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5611 -> 4488
+2026-08-04 16:02:34 - Step 09 | train 2010-2019 -> eval 2020 | IC=0.0110 LS=-0.31% TopK-edge=+0.28% hit=42% stocks=430 months=12 | COVID crash
+2026-08-04 16:02:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55289 -> 44205
+2026-08-04 16:02:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4472
+2026-08-04 16:05:33 - Step 10 | train 2011-2020 -> eval 2021 | IC=-0.0107 LS=+0.32% TopK-edge=-0.00% hit=58% stocks=435 months=12 | COVID recovery
+2026-08-04 16:05:33 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55480 -> 44358
+2026-08-04 16:05:33 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5510 -> 4403
+2026-08-04 16:08:34 - Step 11 | train 2012-2021 -> eval 2022 | IC=0.0377 LS=+1.98% TopK-edge=+0.87% hit=67% stocks=430 months=12 | Inflation / rate-rise year
+2026-08-04 16:08:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55590 -> 44442
+2026-08-04 16:08:34 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5366 -> 4289
+2026-08-04 16:11:34 - Step 12 | train 2013-2022 -> eval 2023 | IC=0.0198 LS=-0.40% TopK-edge=-0.05% hit=42% stocks=417 months=12 | Previous validation year
+2026-08-04 16:11:35 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55569 -> 44425
+2026-08-04 16:11:35 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5269 -> 4212
+2026-08-04 16:14:35 - Step 13 | train 2014-2023 -> eval 2024 | IC=0.0158 LS=+0.56% TopK-edge=+0.55% hit=58% stocks=411 months=12 | Recent period
+2026-08-04 16:14:35 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55304 -> 44212
+2026-08-04 16:14:35 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 4749 -> 3797
+2026-08-04 16:16:41 - Step 14 | train 2015-2024 -> eval 2025 | IC=-0.0209 LS=+0.14% TopK-edge=+0.13% hit=45% stocks=397 months=11 | Most recent (partial year if needed)
+2026-08-04 16:16:41 - 
+2026-08-04 16:16:41 - ========================================================================
+2026-08-04 16:16:41 - WALK-FORWARD SUMMARY | baseline (successful steps only)
+2026-08-04 16:16:41 - Contiguous gap drops (eval): 0 / 58622 candidates (0.0%)
+2026-08-04 16:16:41 - ========================================================================
+2026-08-04 16:16:41 - step         eval       IC      LS/mo  TopK-edge      hit   stocks
+2026-08-04 16:16:41 - 1            2012   0.0066     +1.02%     +0.09%      58%      425
+2026-08-04 16:16:41 - 2            2013   0.0144     +0.00%     -0.47%      50%      417
+2026-08-04 16:16:41 - 3            2014   0.0261     +1.09%     +0.29%      58%      431
+2026-08-04 16:16:41 - 4            2015   0.0321     +0.84%     +0.12%      42%      441
+2026-08-04 16:16:41 - 5            2016  -0.0027     +0.13%     +1.15%      75%      436
+2026-08-04 16:16:41 - 6            2017   0.0064     -0.25%     -0.30%      50%      433
+2026-08-04 16:16:41 - 7            2018  -0.0036     +0.04%     +0.27%      50%      428
+2026-08-04 16:16:41 - 8            2019   0.0148     +0.62%     -0.25%      33%      435
+2026-08-04 16:16:41 - 9            2020   0.0110     -0.31%     +0.28%      42%      430
+2026-08-04 16:16:41 - 10           2021  -0.0107     +0.32%     -0.00%      58%      435
+2026-08-04 16:16:41 - 11           2022   0.0377     +1.98%     +0.87%      67%      430
+2026-08-04 16:16:41 - 12           2023   0.0198     -0.40%     -0.05%      42%      417
+2026-08-04 16:16:41 - 13           2024   0.0158     +0.56%     +0.55%      58%      411
+2026-08-04 16:16:41 - 14           2025  -0.0209     +0.14%     +0.13%      45%      397
+2026-08-04 16:16:41 - 0         AVERAGE   0.0105     +0.41%     +0.19%      52%      426
+2026-08-04 16:16:41 - Saved summary -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_baseline\summary_metrics.csv
+2026-08-04 16:16:41 - Sequence cache: hits=0 misses=28 size=28
+2026-08-04 16:16:42 - 
+2026-08-04 16:16:42 - ========================================================================
+2026-08-04 16:16:42 - LSTM WALK-FORWARD | sentiment | window=rolling | seq=9 hidden=64 epochs=35 | seed=42 | steps=14 | honest_oos=True
+2026-08-04 16:16:42 - Warm-start=True | contiguous=False | liquidity_drop=0.2 | sector_neutral=True | members=True
+2026-08-04 16:16:42 - Torch device: cpu | AMP=False
+2026-08-04 16:16:42 - Features (24): log_market_cap, sma_20, SMB, MOM, bb_lower, debt_equity, CMA, sma_15, HML, macd_signal, volatility_30d, price_to_sma_20, atr, volume_trend, RMW, bb_middle, eqy_turnover, revenue_growth, macd, news_sentiment, news_publication_count, twitter_sentiment, twitter_publication_count, sentiment_proxy
+2026-08-04 16:16:42 - Output: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_sentiment
+2026-08-04 16:16:42 - ========================================================================
+2026-08-04 16:16:42 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 48071 -> 38427
+2026-08-04 16:16:42 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5400 -> 4319
+2026-08-04 16:18:25 - Step 01 | train 2002-2011 -> eval 2012 | IC=-0.0176 LS=-1.38% TopK-edge=-0.60% hit=33% stocks=425 months=12 | Post-GFC recovery
+2026-08-04 16:18:25 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 50189 -> 40123
+2026-08-04 16:18:25 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5387 -> 4306
+2026-08-04 16:20:12 - Step 02 | train 2003-2012 -> eval 2013 | IC=0.0065 LS=-0.37% TopK-edge=-0.28% hit=58% stocks=417 months=12 | 
+2026-08-04 16:20:13 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 50946 -> 40727
+2026-08-04 16:20:13 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5534 -> 4425
+2026-08-04 16:21:59 - Step 03 | train 2004-2013 -> eval 2014 | IC=-0.0238 LS=-0.80% TopK-edge=-0.88% hit=25% stocks=431 months=12 | 
+2026-08-04 16:22:00 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 51744 -> 41365
+2026-08-04 16:22:00 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5627 -> 4498
+2026-08-04 16:23:48 - Step 04 | train 2005-2014 -> eval 2015 | IC=0.0100 LS=+0.50% TopK-edge=+0.57% hit=67% stocks=441 months=12 | 
+2026-08-04 16:23:48 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 52637 -> 42077
+2026-08-04 16:23:48 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4471
+2026-08-04 16:25:38 - Step 05 | train 2006-2015 -> eval 2016 | IC=-0.0119 LS=-0.10% TopK-edge=+0.14% hit=42% stocks=436 months=12 | Brexit referendum year
+2026-08-04 16:25:38 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 53478 -> 42749
+2026-08-04 16:25:38 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5562 -> 4447
+2026-08-04 16:27:31 - Step 06 | train 2007-2016 -> eval 2017 | IC=0.0245 LS=-0.71% TopK-edge=-0.17% hit=50% stocks=433 months=12 | 
+2026-08-04 16:27:31 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 54210 -> 43334
+2026-08-04 16:27:31 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5580 -> 4460
+2026-08-04 16:29:25 - Step 07 | train 2008-2017 -> eval 2018 | IC=-0.0152 LS=-0.32% TopK-edge=-0.29% hit=42% stocks=428 months=12 | 
+2026-08-04 16:29:25 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 54773 -> 43786
+2026-08-04 16:29:26 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4472
+2026-08-04 16:31:25 - Step 08 | train 2009-2018 -> eval 2019 | IC=0.0064 LS=-0.15% TopK-edge=-0.64% hit=42% stocks=435 months=12 | 
+2026-08-04 16:31:26 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55079 -> 44033
+2026-08-04 16:31:26 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5611 -> 4488
+2026-08-04 16:33:26 - Step 09 | train 2010-2019 -> eval 2020 | IC=-0.0105 LS=-0.17% TopK-edge=+0.74% hit=50% stocks=430 months=12 | COVID crash
+2026-08-04 16:33:26 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55289 -> 44205
+2026-08-04 16:33:26 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5593 -> 4472
+2026-08-04 16:35:22 - Step 10 | train 2011-2020 -> eval 2021 | IC=-0.0133 LS=+1.50% TopK-edge=+0.71% hit=58% stocks=435 months=12 | COVID recovery
+2026-08-04 16:35:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55480 -> 44358
+2026-08-04 16:35:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5510 -> 4403
+2026-08-04 16:37:19 - Step 11 | train 2012-2021 -> eval 2022 | IC=-0.0124 LS=+0.03% TopK-edge=+0.09% hit=67% stocks=430 months=12 | Inflation / rate-rise year
+2026-08-04 16:37:19 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55590 -> 44442
+2026-08-04 16:37:19 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5366 -> 4289
+2026-08-04 16:39:22 - Step 12 | train 2013-2022 -> eval 2023 | IC=-0.0065 LS=-0.08% TopK-edge=-0.26% hit=33% stocks=417 months=12 | Previous validation year
+2026-08-04 16:39:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55569 -> 44425
+2026-08-04 16:39:22 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 5269 -> 4212
+2026-08-04 16:41:20 - Step 13 | train 2014-2023 -> eval 2024 | IC=0.0434 LS=+0.39% TopK-edge=+0.23% hit=67% stocks=411 months=12 | Recent period
+2026-08-04 16:41:21 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 55304 -> 44212
+2026-08-04 16:41:21 - Liquidity filter drop_q=0.20 via eqy_turnover | rows 4749 -> 3797
+2026-08-04 16:43:15 - Step 14 | train 2015-2024 -> eval 2025 | IC=0.0076 LS=+1.00% TopK-edge=+0.37% hit=55% stocks=397 months=11 | Most recent (partial year if needed)
+2026-08-04 16:43:15 - 
+2026-08-04 16:43:15 - ========================================================================
+2026-08-04 16:43:15 - WALK-FORWARD SUMMARY | sentiment (successful steps only)
+2026-08-04 16:43:15 - Contiguous gap drops (eval): 0 / 58622 candidates (0.0%)
+2026-08-04 16:43:15 - ========================================================================
+2026-08-04 16:43:15 - step         eval       IC      LS/mo  TopK-edge      hit   stocks
+2026-08-04 16:43:15 - 1            2012  -0.0176     -1.38%     -0.60%      33%      425
+2026-08-04 16:43:15 - 2            2013   0.0065     -0.37%     -0.28%      58%      417
+2026-08-04 16:43:15 - 3            2014  -0.0238     -0.80%     -0.88%      25%      431
+2026-08-04 16:43:15 - 4            2015   0.0100     +0.50%     +0.57%      67%      441
+2026-08-04 16:43:15 - 5            2016  -0.0119     -0.10%     +0.14%      42%      436
+2026-08-04 16:43:15 - 6            2017   0.0245     -0.71%     -0.17%      50%      433
+2026-08-04 16:43:15 - 7            2018  -0.0152     -0.32%     -0.29%      42%      428
+2026-08-04 16:43:15 - 8            2019   0.0064     -0.15%     -0.64%      42%      435
+2026-08-04 16:43:15 - 9            2020  -0.0105     -0.17%     +0.74%      50%      430
+2026-08-04 16:43:15 - 10           2021  -0.0133     +1.50%     +0.71%      58%      435
+2026-08-04 16:43:15 - 11           2022  -0.0124     +0.03%     +0.09%      67%      430
+2026-08-04 16:43:15 - 12           2023  -0.0065     -0.08%     -0.26%      33%      417
+2026-08-04 16:43:15 - 13           2024   0.0434     +0.39%     +0.23%      67%      411
+2026-08-04 16:43:15 - 14           2025   0.0076     +1.00%     +0.37%      55%      397
+2026-08-04 16:43:15 - 0         AVERAGE  -0.0009     -0.05%     -0.02%      49%      426
+2026-08-04 16:43:15 - Saved summary -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_sentiment\summary_metrics.csv
+2026-08-04 16:43:15 - Sequence cache: hits=0 misses=28 size=28
+2026-08-04 16:43:15 - Saved comparison -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_comparison.csv
+2026-08-04 16:43:15 - WALK-FORWARD AVG [baseline] | IC=0.0105 LS=+0.41% TopK-edge=+0.19% hit=52% | steps_ok=14/14
+2026-08-04 16:43:15 - Appended results tracker row -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_results_tracker.csv
+2026-08-04 16:43:15 - WALK-FORWARD AVG [sentiment] | IC=-0.0009 LS=-0.05% TopK-edge=-0.02% hit=49% | steps_ok=14/14
+2026-08-04 16:43:15 - Appended results tracker row -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_results_tracker.csv
+2026-08-04 16:43:15 - Comparison CSV: C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_comparison.csv
+2026-08-04 16:43:15 - Mirrored C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_baseline -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\esemble\lstm\walk_forward_baseline
+2026-08-04 16:43:15 - Mirrored C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\saved_data\lstm_walk_forward\walk_forward_sentiment -> C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\esemble\lstm\walk_forward_sentiment

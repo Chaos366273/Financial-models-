@@ -1,0 +1,54 @@
+data:
+  # Final dissertation panel (already merged: tech + fund + FF5 + sentiment + macro + sector)
+  master_panel: "../../data/final data for AI/07_panel/master_panel.parquet"
+  # Daily OHLCV+indicators — optional; used only by H3b GARCH when present
+  features_csv: "../../data/bloomberg/trading_data_features.csv"
+  fundamentals_csv: "../../data/final data for AI/02_fundamentals/Fundamental_Data_Full.csv"
+  risk_free_csv: "../../data/final data for AI/05_macro/risk_free_monthly.csv"
+  risk_free_rate: 0.0  # fallback when risk_free_csv missing or month unmatched
+  # FY(t) usable from (t+1)-01-01 + N months (only used if rebuilding from CSVs)
+  fundamentals_lag_months: 6
+  # Legacy rebuild cache (ignored when master_panel exists)
+  panel_cache: "../../data/bloomberg/panel_monthly.parquet"
+
+splits:
+  train_end: "2022-12-31"
+  val_end: "2023-12-31"
+  test_label: "2024+"
+
+portfolio:
+  transaction_cost_bps: 10
+  rebalance: "M"
+
+outputs:
+  dir: "outputs"
+  bundle: "outputs/lab_results_bundle.json"
+
+lstm:
+  hidden_size: 32
+  epochs: 15
+  batch_size: 64
+  seq_len: 6
+
+xgboost:
+  n_estimators: 400
+  max_depth: 4
+  learning_rate: 0.03
+  min_child_weight: 10
+  subsample: 0.8
+  colsample_bytree: 0.8
+  members_only: true
+  demean_within_month: true
+  winsorise_y: true
+
+random_forest:
+  n_estimators: 200
+  max_depth: 8
+
+# Meta-learner for stacked_ensemble (XGB + LSTM → PPO blend on validation)
+ppo_meta:
+  learning_rate: 0.0003
+  n_steps: 64
+  batch_size: 32
+  gamma: 0.99
+  total_timesteps: 2000

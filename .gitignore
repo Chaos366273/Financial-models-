@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+
+# IDE / OS
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+Thumbs.db
+.Desktop.ini
+
+# Private data (Bloomberg licence — keep local; not in public repo)
+final data for AI/
+
+# Secrets — never commit
+.env
+.env.*
+*.pem
+*secrets*
+*api_key*
+credentials.json
+
+
+# Large run artefacts (regenerate from scripts + local data)
+methodology/model manul code/final test results/
+methodology/model manul code/saved_data/
+methodology/model manul code/fama french/walk_forward_baseline/
+methodology/model manul code/marvok/walk_forward_baseline/
+methodology/model manul code/esemble/trading_ppo/ppo/saved_data/
+methodology/model manul code/esemble/trading_ppo/ppo/daily_reports/
+methodology/model manul code/esemble/trading_ppo/ppo/analytics/
+methodology/dissertation-models/outputs/artifacts/
+methodology/dissertation-models/outputs/lab_results_bundle.json
+
+# Large local caches (reproducible from panel / scripts)
+methodology/model manul code/saved_data/yahoo/
+methodology/model manul code/esemble/trading_ppo/ppo/saved_data/csv_data/stock_details_5_years.csv
+
+# Redundant Bloomberg re-extract backups
+final data for AI/missing/backups/
+final data for AI/missing/raw_cache/
+final data for AI/missing/logs/
+
+# Run logs (optional artefacts; regenerate on execution)
+methodology/model manul code/logs/*.txt
+methodology/model manul code/**/walk_forward_run_*.txt
+methodology/model manul code/**/xgb_run_*.txt
+methodology/model manul code/**/ff5_run_*.txt
+
+# Jupyter
+.ipynb_checkpoints/
+
+# PyTorch / ML checkpoints (regenerate)
+*.pt
+*.pth
+*.ckpt
+
+# Temporary
+*.tmp
+*.bak
+~$*

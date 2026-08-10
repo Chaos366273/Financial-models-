@@ -1,0 +1,41 @@
+{
+  "formula": "target_excess_return ~ regime-weighted FF5 (k=2); y_pred = p0*X*b0 + p1*X*b1",
+  "k_regimes": 2,
+  "labels": [
+    "bear",
+    "bull"
+  ],
+  "n_train": 54210,
+  "n_eval": 5580,
+  "coefficients": {
+    "regime_0": {
+      "const": 0.01557918016374484,
+      "MKT_RF": -0.011181041007761213,
+      "SMB": -0.36913022633416237,
+      "HML": 0.26774277414088676,
+      "RMW": -0.43899363091300325,
+      "CMA": -1.3711264416861906
+    },
+    "regime_1": {
+      "const": 0.019541522993884477,
+      "MKT_RF": -0.26214628530566897,
+      "SMB": -1.018445638159948,
+      "HML": 1.0672723932620856,
+      "RMW": 0.7325750453612437,
+      "CMA": -0.7195651897250216
+    },
+    "pooled": null
+  },
+  "mode": "regime_wls",
+  "train_assign": "soft",
+  "allow_pooled_fallback": 0,
+  "used": {
+    "regime_0": 1,
+    "regime_1": 1
+  },
+  "fallback_reasons": [],
+  "train_month_counts": {
+    "bear": 82,
+    "bull": 87
+  }
+}

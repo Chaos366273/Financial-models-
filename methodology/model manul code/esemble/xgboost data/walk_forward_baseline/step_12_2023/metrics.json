@@ -1,0 +1,109 @@
+{
+  "step": 12,
+  "eval_year": 2023,
+  "train_start": 2013,
+  "train_end": 2022,
+  "experiment": "baseline",
+  "n_features": 19,
+  "feature_cols": [
+    "log_market_cap",
+    "sma_20",
+    "SMB",
+    "MOM",
+    "bb_lower",
+    "debt_equity",
+    "CMA",
+    "sma_15",
+    "HML",
+    "macd_signal",
+    "volatility_30d",
+    "price_to_sma_20",
+    "atr",
+    "volume_trend",
+    "RMW",
+    "bb_middle",
+    "eqy_turnover",
+    "revenue_growth",
+    "macd"
+  ],
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "min_child_weight": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 178
+  },
+  "ic": 0.012007301042341599,
+  "ic_std": 0.08038003243348425,
+  "long_short": 0.01577125406674706,
+  "topk_avg_return": -0.00027982948257850455,
+  "topk_edge": 0.0013231322703692566,
+  "hit_rate": 0.5,
+  "n_eval_rows": 5366,
+  "n_months": 12,
+  "top10_importance": [
+    {
+      "feature": "log_market_cap",
+      "importance": 0.09515997767448425
+    },
+    {
+      "feature": "CMA",
+      "importance": 0.07140342146158218
+    },
+    {
+      "feature": "MOM",
+      "importance": 0.06296606361865997
+    },
+    {
+      "feature": "RMW",
+      "importance": 0.05791766569018364
+    },
+    {
+      "feature": "SMB",
+      "importance": 0.0570785328745842
+    },
+    {
+      "feature": "HML",
+      "importance": 0.05625413730740547
+    },
+    {
+      "feature": "sma_20",
+      "importance": 0.05215662717819214
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.051882725208997726
+    },
+    {
+      "feature": "volatility_30d",
+      "importance": 0.050033848732709885
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.04917818680405617
+    }
+  ],
+  "shap_top5": [
+    {
+      "feature": "volatility_30d",
+      "mean_abs_shap": 0.0018690187716856599
+    },
+    {
+      "feature": "SMB",
+      "mean_abs_shap": 0.0015789406606927514
+    },
+    {
+      "feature": "RMW",
+      "mean_abs_shap": 0.0011074957437813282
+    },
+    {
+      "feature": "price_to_sma_20",
+      "mean_abs_shap": 0.0010906754760071635
+    },
+    {
+      "feature": "HML",
+      "mean_abs_shap": 0.001085761352442205
+    }
+  ]
+}
