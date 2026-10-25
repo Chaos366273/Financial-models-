@@ -1,0 +1,2 @@
+n_stock_months,n_tickers,n_months,month_min,month_max,n_xgb_features_h1,n_xgb_features_h2,lstm_seq_len,n_lstm_sequences_if_full_panel,ais_dropped,filters,note
+119541,807,284,2002-04-01,2025-11-01,78,83,9,113216,AIS.LN 2014-04-01,is_member; drop Unknown sector; drop AIS.LN 2014-04,"XGB and LSTM share this stock-month panel and the same 78 columns. LSTM trains on 9-month windows of these columns, so n_sequences < n_stock_months. Descriptive stats below are stock-month (the collected data), not flattened 9x78."

@@ -14,6 +14,31 @@ from data.features import add_proxy_sentiment, winsorise_with_bounds
 # Fallback if fundamentals file has no tickers (legacy pilot bundle).
 PILOT_EQUITY_TICKERS = {"AAPL", "AMZN", "JNJ", "JPM", "KO", "MSFT", "NVDA"}
 
+# Corporate-action holes: not genuine monthly excess returns. Drop from the H1 panel.
+# AIS.LN 2014-04: target_excess_return ≈ +218 (+21,800%); unadjusted event.
+KNOWN_BAD_RETURN_ROWS = (
+    ("AIS.LN", "2014-04-01"),
+)
+
+
+def drop_known_data_errors(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove documented bad stock-months. Idempotent. Column is Ticker, not stock."""
+    if df is None or df.empty or "Ticker" not in df.columns or "month" not in df.columns:
+        return df
+    out = df.copy()
+    month = pd.to_datetime(out["month"])
+    ticker = out["Ticker"].astype(str)
+    mask = pd.Series(False, index=out.index)
+    for tic, mo in KNOWN_BAD_RETURN_ROWS:
+        mask |= (ticker == tic) & (month == pd.Timestamp(mo))
+    n = int(mask.sum())
+    if n:
+        out = out.loc[~mask].copy()
+        out.attrs["dropped_bad_return_rows"] = n
+    else:
+        out.attrs["dropped_bad_return_rows"] = 0
+    return out
+
 
 def _equity_universe(fund: pd.DataFrame, monthly: pd.DataFrame) -> set[str]:
     """Tickers eligible for FF5 cross-sectional factor construction."""
@@ -326,6 +351,7 @@ def _load_master_panel(path: str) -> pd.DataFrame:
     monthly = monthly.copy()
     monthly["month"] = pd.to_datetime(monthly["month"])
     monthly = monthly.dropna(subset=["target_excess_return"])
+    monthly = drop_known_data_errors(monthly)
     # Keep proxy if already present; otherwise build for H2 backward compatibility
     if "sentiment_proxy" not in monthly.columns:
         monthly = add_proxy_sentiment(monthly, train_end=None)
@@ -381,6 +407,7 @@ def build_panel() -> tuple[PanelData, dict]:
                 _write_panel_cache(cache_path, monthly, cfg)
         source_label = str(features_csv)
 
+    monthly = drop_known_data_errors(monthly)
     train, val, test, fold = split_panel(monthly, cfg)
     empty_splits = [
         name for name, frame in (("train", train), ("validation", val), ("test", test))

@@ -1,0 +1,14 @@
+Check,Spec / result
+Feature set,B_drop_bottom9 (19 feats from h1_clean); A_top16 secondary only
+Hyper-parameters,"depth=4, lr=0.03, min_child_weight=8, trees=178"
+Target (frozen),Sector-neutral excess return; winsor 1%/99%
+Exp1 market-neutral Y only,IC 0.0503; Top-50 edge 0.99%; hit 66.7% → reject for book
+Exp2 tighter winsor 0.5%/99.5%,IC noisier; imp. stability weaker → keep 1%/99%
+Exp3 no demean,IC 0.0236; Top-50 edge ~0; hit 41.7% → demeaning required
+Liquidity (primary),LIQUIDITY_FILTER=False (full universe)
+Exp4 drop bottom 10%,IC 0.0338; Top-50 edge 0.81%; hit 66.7% (robustness only)
+Exp5 drop bottom 20%,IC 0.0299; Top-50 edge 0.47%; hit 50.0% (robustness only)
+Top-50 size/liquidity (val),Smaller & less liquid than universe (log mcap −0.62; turnover 0.50×)
+Sector concentration (val),Max avg sector weight Real Estate 20.2% (diversified)
+Top-50 risk (val),Mean +1.46%/mo; vol 5.34%; Sharpe 0.27; max DD −7.9%
+Factor corr of y_pred (val),MOM +0.21; SMB −0.19; HML −0.14; log mcap ~0

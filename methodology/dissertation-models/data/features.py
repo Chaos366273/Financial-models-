@@ -118,6 +118,15 @@ ALL_INDICATOR_COLS = (
     + SECTOR_DUMMY_COLS
 )
 
+# Kitchen-sink X: panel predictors minus filter flags, RF (already in y), Unknown dummy, sentiment.
+# Sentiment is added back only in kitchen_sink_sentiment.
+_KITCHEN_SINK_DROP = set(SENTIMENT_COLS) | set(MEMBERSHIP_COLS) | {
+    "risk_free_monthly",
+    "sector__Unknown",
+}
+KITCHEN_SINK_COLS = [c for c in ALL_INDICATOR_COLS if c not in _KITCHEN_SINK_DROP]
+KITCHEN_SINK_SENTIMENT_COLS = list(KITCHEN_SINK_COLS) + list(SENTIMENT_COLS)
+
 
 def winsorise(s: pd.Series, lower: float = 0.01, upper: float = 0.99) -> pd.Series:
     """Winsorise using bounds estimated from the series itself."""
@@ -185,6 +194,8 @@ def get_feature_columns(feature_set: str) -> list[str]:
       h1_clean / h1_stockpick — stock-picking set (no MKT_RF, no sector dummies)
       h1_hybrid       — tech/fund/FF5(+MKT_RF)/MOM + sector dummies (restored)
       all_indicators  — full master-panel predictor set
+      kitchen_sink    — panel X minus sentiment / is_member / has_bloomberg_sentiment / RF / Unknown dummy
+      kitchen_sink_sentiment — kitchen_sink + five sentiment columns
     """
     base = TECH_COLS + FUND_COLS + FACTOR_COLS
     if feature_set == "traditional":
@@ -197,9 +208,14 @@ def get_feature_columns(feature_set: str) -> list[str]:
         return list(H1_HYBRID_COLS)
     if feature_set in ("all_indicators", "full", "all"):
         return list(ALL_INDICATOR_COLS)
+    if feature_set in ("kitchen_sink", "h1_kitchen"):
+        return list(KITCHEN_SINK_COLS)
+    if feature_set in ("kitchen_sink_sentiment", "h1_kitchen_sentiment"):
+        return list(KITCHEN_SINK_SENTIMENT_COLS)
     raise ValueError(
         f"Unknown feature_set={feature_set!r}. "
-        "Use traditional | with_alt_data | h1_clean | h1_hybrid | all_indicators"
+        "Use traditional | with_alt_data | h1_clean | h1_hybrid | all_indicators | "
+        "kitchen_sink | kitchen_sink_sentiment"
     )
 
 

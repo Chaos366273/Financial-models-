@@ -1,0 +1,7 @@
+Metric,Validation (2023),Test (2024–2025)
+Spearman IC (monthly mean),0.0444,Locked / not yet run
+Long–short (top–bottom 10%),2.60%,Locked / not yet run
+Top-50 edge vs equal-weight market,1.62%,Locked / not yet run
+Top-50 hit rate (months beat market),91.7%,Locked / not yet run
+Top-50 avg monthly turnover,62%,Locked / not yet run
+RMSE (level),0.1011,Locked / not yet run

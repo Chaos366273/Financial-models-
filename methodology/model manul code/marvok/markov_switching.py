@@ -14,6 +14,7 @@ Appendix:
   Pure Hamilton market forecast of MKT_RF (not stock-month H1 unit).
 
 Protocol matches fama5.py / xgb_walk_forward (10y train -> 1y eval, members-only).
+H1 metrics match fama5.py; WLS/pooled OLS use HAC(4) SEs (point estimates unchanged).
 
 Commands:
   python markov_switching.py
@@ -67,6 +68,14 @@ FACTOR_COLS = ["MKT_RF", "SMB", "HML", "RMW", "CMA"]
 TARGET_COL = "target_excess_return"
 FILTER_MEMBERS = True
 COLLAPSE_MU_EPS = 1e-6
+HAC_MAXLAGS = 4
+HAC_FIT_KWDS = {"cov_type": "HAC", "cov_kwds": {"maxlags": HAC_MAXLAGS}}
+TOP_K = 50
+H1_METRIC_KEYS = [
+    "rmse", "mae", "mse", "r2", "r2_oos",
+    "ic_mean", "long_short_mean", "long_short_sharpe",
+    "topk_avg_return", "topk_edge", "hit_rate",
+]
 
 # Frozen rolling soft+filtered+MKT_RF baselines (never overwritten by sensitivities)
 WF_DIR_K2 = OUT_ROOT / "walk_forward_baseline"
@@ -116,8 +125,12 @@ WALK_WINDOWS = [
 ]
 
 FF5_SUMMARY = (
-    MANUAL_ROOT / "final test results" / "ff5" / "walk_forward_baseline"
+    MANUAL_ROOT / "fama french" / "walk_forward_baseline"
     / "walk_forward_baseline_summary.csv"
+)
+FF5_POOLED = (
+    MANUAL_ROOT / "fama french" / "walk_forward_baseline"
+    / "pooled_oos_predictions.csv"
 )
 XGB_SUMMARY = (
     MANUAL_ROOT / "final test results" / "xgboost 2" / "walk_forward_baseline"
@@ -531,7 +544,7 @@ def _fit_pooled_ff5(train: pd.DataFrame):
     if X_tr.empty:
         raise ValueError("Empty train matrix for pooled FF5")
     X_c = sm.add_constant(X_tr, has_constant="add")
-    model = sm.OLS(y_tr, X_c).fit()
+    model = sm.OLS(y_tr, X_c).fit(**HAC_FIT_KWDS)
     return model
 
 
@@ -549,12 +562,60 @@ def _fit_weighted_ff5(train: pd.DataFrame, weight_col: str):
         raise ValueError("Too few positive weights for WLS")
     X_c = sm.add_constant(work.loc[m, FACTOR_COLS].astype(float), has_constant="add")
     y = work.loc[m, TARGET_COL].astype(float)
-    model = sm.WLS(y, X_c, weights=w[m]).fit()
+    model = sm.WLS(y, X_c, weights=w[m]).fit(**HAC_FIT_KWDS)
     return model
 
 
 def _coeffs_dict(model) -> dict:
-    return {str(k): float(v) for k, v in model.params.items()}
+    coeffs = {str(k): float(v) for k, v in model.params.items()}
+    coeffs.update({f"se_{k}": float(v) for k, v in model.bse.items()})
+    return coeffs
+
+
+def _empty_step_row(
+    i: int, ev_year: int, tr0: int, tr1: int, n_train: int, n_eval: int,
+    fit_mode: str, status: str,
+) -> dict:
+    row = {
+        "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
+        "n_train": n_train, "n_eval": n_eval,
+        **_blank_h1_metrics(),
+        "ic_ir": np.nan,
+        "n_months": np.nan,
+        "ranking_identified": False,
+        "fit_mode": fit_mode,
+        "status": status,
+    }
+    return row
+
+
+def _ok_step_row(
+    i: int, ev_year: int, tr0: int, tr1: int, n_train: int, n_eval: int,
+    metrics: dict, fit_mode: str,
+) -> dict:
+    row = {
+        "step": i,
+        "eval_year": ev_year,
+        "train_start": tr0,
+        "train_end": tr1,
+        "n_train": n_train,
+        "n_eval": n_eval,
+        "fit_mode": fit_mode,
+        "status": "ok",
+        "ic_ir": metrics.get("ic_ir"),
+        "n_months": metrics.get("n_months"),
+        "ranking_identified": metrics.get("ranking_identified"),
+    }
+    for k in H1_METRIC_KEYS:
+        row[k] = metrics.get(k)
+    return row
+
+
+def _mean_ok(ok: pd.DataFrame, col: str) -> float:
+    if ok is None or not len(ok) or col not in ok.columns:
+        return np.nan
+    s = pd.to_numeric(ok[col], errors="coerce")
+    return float(s.mean()) if s.notna().any() else np.nan
 
 
 def _predict_with_model(model, eval_meta: pd.DataFrame) -> np.ndarray:
@@ -780,40 +841,59 @@ def _fit_predict_step(train: pd.DataFrame, eval_df: pd.DataFrame) -> tuple[pd.Da
     return frame, coeff_meta, regime_meta
 
 
+def _blank_h1_metrics() -> dict:
+    return {k: np.nan for k in H1_METRIC_KEYS}
+
+
 def _step_metrics(frame: pd.DataFrame) -> dict:
-    from evaluation.predictive import predictive_metrics, ranking_metrics
+    from evaluation.predictive import economic_metrics, predictive_metrics, ranking_metrics
 
     pm = predictive_metrics(frame["y_true"].values, frame["y_pred"].values)
     rm = ranking_metrics(frame)
+    em = economic_metrics(frame, k=TOP_K)
     return {
         "mse": pm.get("mse"),
         "mae": pm.get("mae"),
         "rmse": pm.get("rmse"),
         "r2": pm.get("r2"),
+        "r2_oos": pm.get("r2_oos"),
         "n_obs": pm.get("n_obs"),
         "ic_mean": rm.get("ic_mean"),
         "ic_ir": rm.get("ic_ir"),
         "long_short_mean": rm.get("long_short_mean"),
-        "n_months": rm.get("n_months"),
+        "long_short_sharpe": rm.get("long_short_sharpe"),
+        "topk_avg_return": em.get("topk_avg_return"),
+        "topk_edge": em.get("topk_edge"),
+        "hit_rate": em.get("hit_rate"),
+        "n_months": rm.get("n_months") or em.get("n_months"),
+        "ranking_identified": bool(rm.get("ranking_identified") or em.get("ranking_identified")),
     }
 
 
 def pooled_metrics(df: pd.DataFrame) -> dict:
-    from evaluation.predictive import predictive_metrics, ranking_metrics
+    from evaluation.predictive import economic_metrics, predictive_metrics, ranking_metrics
 
     if df is None or df.empty:
-        return {
-            "mse": None, "mae": None, "rmse": None, "r2": None, "n_obs": 0,
-            "ic_mean": None, "ic_ir": None, "long_short_mean": None,
-        }
+        out = _blank_h1_metrics()
+        out["n_obs"] = 0
+        out["ic_ir"] = None
+        out["n_months"] = 0
+        out["ranking_identified"] = False
+        return out
     pm = predictive_metrics(df["y_true"].values, df["y_pred"].values)
     rm = ranking_metrics(df)
+    em = economic_metrics(df, k=TOP_K)
     return {
         **pm,
         "ic_mean": rm.get("ic_mean"),
         "ic_ir": rm.get("ic_ir"),
         "long_short_mean": rm.get("long_short_mean"),
-        "n_months": rm.get("n_months"),
+        "long_short_sharpe": rm.get("long_short_sharpe"),
+        "topk_avg_return": em.get("topk_avg_return"),
+        "topk_edge": em.get("topk_edge"),
+        "hit_rate": em.get("hit_rate"),
+        "n_months": rm.get("n_months") or em.get("n_months"),
+        "ranking_identified": bool(rm.get("ranking_identified") or em.get("ranking_identified")),
     }
 
 
@@ -822,8 +902,10 @@ def _append_tracker(row: dict) -> None:
     fields = [
         "timestamp", "mode", "k_regimes", "window", "train_assign",
         "train_prob_source", "market_series", "allow_pooled_fallback",
-        "rmse", "mae", "mse", "r2",
-        "ic_mean", "long_short_mean", "n_obs", "n_steps_ok", "output_dir",
+        "rmse", "mae", "mse", "r2", "r2_oos",
+        "ic_mean", "long_short_mean", "long_short_sharpe",
+        "topk_avg_return", "topk_edge", "hit_rate",
+        "n_obs", "n_steps_ok", "output_dir",
     ]
     write_header = not RESULTS_TRACKER.is_file()
     with RESULTS_TRACKER.open("a", newline="", encoding="utf-8") as f:
@@ -909,13 +991,9 @@ def run_walk_forward_markov(
         )
 
         if train.empty or eval_df.empty:
-            rows.append({
-                "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
-                "n_train": len(train), "n_eval": 0,
-                "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
-                "fit_mode": "", "status": "skipped_empty",
-            })
+            rows.append(_empty_step_row(
+                i, ev_year, tr0, tr1, len(train), 0, "", "skipped_empty",
+            ))
             continue
 
         # --- Market appendix (always) ---
@@ -981,27 +1059,25 @@ def run_walk_forward_markov(
         except Exception as exc:
             log.exception("  Market appendix FAILED: %s", exc)
             if not stock_level:
-                rows.append({
-                    "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
-                    "n_train": len(train), "n_eval": len(eval_df),
-                    "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                    "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
-                    "fit_mode": "", "status": f"error: {exc}",
-                })
+                rows.append(_empty_step_row(
+                    i, ev_year, tr0, tr1, len(train), len(eval_df), "",
+                    f"error: {exc}",
+                ))
                 continue
             mkt_frame = pd.DataFrame()
             mkt_metrics = {}
 
         if not stock_level:
             rows.append({
-                "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
-                "n_train": len(train), "n_eval": int(len(mkt_frame)),
+                **_empty_step_row(
+                    i, ev_year, tr0, tr1, len(train), int(len(mkt_frame)),
+                    "market_only", "ok",
+                ),
                 "rmse": mkt_metrics.get("rmse"),
                 "mae": mkt_metrics.get("mae"),
                 "mse": mkt_metrics.get("mse"),
                 "r2": mkt_metrics.get("r2"),
-                "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
-                "fit_mode": "market_only", "status": "ok",
+                "r2_oos": mkt_metrics.get("r2_oos"),
             })
             continue
 
@@ -1012,13 +1088,10 @@ def run_walk_forward_markov(
         except Exception as exc:
             log.exception("  FAILED: %s", exc)
             if not ALLOW_POOLED_FALLBACK:
-                rows.append({
-                    "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
-                    "n_train": len(train), "n_eval": len(eval_df),
-                    "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                    "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
-                    "fit_mode": "no_fallback", "status": f"error: {exc}",
-                })
+                rows.append(_empty_step_row(
+                    i, ev_year, tr0, tr1, len(train), len(eval_df),
+                    "no_fallback", f"error: {exc}",
+                ))
                 log.warning("  R5: skipped step_pooled_fallback for %s", step_tag)
                 continue
             # pooled FF5 fallback for the whole step
@@ -1026,7 +1099,7 @@ def run_walk_forward_markov(
                 X_tr, y_tr, _ = _prepare_xy(train)
                 X_ev, y_ev, meta = _prepare_xy(eval_df)
                 X_tr_c = sm.add_constant(X_tr, has_constant="add")
-                model = sm.OLS(y_tr, X_tr_c).fit()
+                model = sm.OLS(y_tr, X_tr_c).fit(**HAC_FIT_KWDS)
                 X_ev_c = sm.add_constant(X_ev, has_constant="add")
                 X_ev_c = X_ev_c.reindex(columns=X_tr_c.columns, fill_value=0.0)
                 pred = np.asarray(model.predict(X_ev_c), dtype=float)
@@ -1060,13 +1133,10 @@ def run_walk_forward_markov(
                 log.warning("  Used pooled FF5 fallback for %s", step_tag)
             except Exception as exc2:
                 log.exception("  Fallback also FAILED: %s", exc2)
-                rows.append({
-                    "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
-                    "n_train": len(train), "n_eval": len(eval_df),
-                    "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                    "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
-                    "fit_mode": "", "status": f"error: {exc2}",
-                })
+                rows.append(_empty_step_row(
+                    i, ev_year, tr0, tr1, len(train), len(eval_df),
+                    "", f"error: {exc2}",
+                ))
                 continue
 
         frame = frame.copy()
@@ -1115,26 +1185,16 @@ def run_walk_forward_markov(
             encoding="utf-8",
         )
 
-        rows.append({
-            "step": i,
-            "eval_year": ev_year,
-            "train_start": tr0,
-            "train_end": tr1,
-            "n_train": int(len(train)),
-            "n_eval": int(len(frame)),
-            "rmse": metrics.get("rmse"),
-            "mae": metrics.get("mae"),
-            "mse": metrics.get("mse"),
-            "r2": metrics.get("r2"),
-            "ic_mean": metrics.get("ic_mean"),
-            "ic_ir": metrics.get("ic_ir"),
-            "long_short_mean": metrics.get("long_short_mean"),
-            "fit_mode": regime_meta.get("fit_mode") or coeff_meta.get("mode"),
-            "status": "ok",
-        })
+        rows.append(_ok_step_row(
+            i, ev_year, tr0, tr1, int(len(train)), int(len(frame)),
+            metrics, regime_meta.get("fit_mode") or coeff_meta.get("mode"),
+        ))
         log.info(
-            "  RMSE=%.4f IC=%s n=%d mode=%s",
+            "  RMSE=%.4f MAE=%.4f R2=%.4f R2_oos=%s IC=%s n=%d mode=%s",
             metrics.get("rmse") or float("nan"),
+            metrics.get("mae") or float("nan"),
+            metrics.get("r2") or float("nan"),
+            f"{metrics.get('r2_oos'):.4f}" if metrics.get("r2_oos") is not None else "n/a",
             f"{metrics.get('ic_mean'):.4f}" if metrics.get("ic_mean") is not None else "n/a",
             metrics.get("n_obs") or 0,
             regime_meta.get("fit_mode") or coeff_meta.get("mode"),
@@ -1147,21 +1207,16 @@ def run_walk_forward_markov(
         "eval_year": "AVERAGE",
         "train_start": "",
         "train_end": "",
-        "n_train": float(ok["n_train"].mean()) if len(ok) else np.nan,
-        "n_eval": float(ok["n_eval"].mean()) if len(ok) else np.nan,
-        "rmse": float(ok["rmse"].mean()) if len(ok) else np.nan,
-        "mae": float(ok["mae"].mean()) if len(ok) else np.nan,
-        "mse": float(ok["mse"].mean()) if len(ok) else np.nan,
-        "r2": float(ok["r2"].mean()) if len(ok) else np.nan,
-        "ic_mean": float(ok["ic_mean"].mean()) if len(ok) and ok["ic_mean"].notna().any() else np.nan,
-        "ic_ir": float(ok["ic_ir"].mean()) if len(ok) and ok["ic_ir"].notna().any() else np.nan,
-        "long_short_mean": (
-            float(ok["long_short_mean"].mean())
-            if len(ok) and ok["long_short_mean"].notna().any() else np.nan
-        ),
+        "n_train": _mean_ok(ok, "n_train"),
+        "n_eval": _mean_ok(ok, "n_eval"),
         "fit_mode": "average",
         "status": "average",
+        "ic_ir": _mean_ok(ok, "ic_ir"),
+        "n_months": _mean_ok(ok, "n_months"),
+        "ranking_identified": False,
     }
+    for k in H1_METRIC_KEYS:
+        avg[k] = _mean_ok(ok, k)
     summary = pd.concat([summary, pd.DataFrame([avg])], ignore_index=True)
     summary_path = WF_DIR / "walk_forward_baseline_summary.csv"
     summary.to_csv(summary_path, index=False)
@@ -1231,11 +1286,13 @@ def run_walk_forward_markov(
     pm = pooled_metrics(pooled) if stock_level else {}
     if stock_level and pooled is not None and not pooled.empty:
         log.info(
-            "POOLED OOS | RMSE=%.4f MAE=%.4f R2=%.4f IC=%s n=%s",
+            "POOLED OOS | RMSE=%.4f MAE=%.4f R2=%.4f R2_oos=%s IC=%s ranking=%s n=%s",
             pm.get("rmse") or float("nan"),
             pm.get("mae") or float("nan"),
             pm.get("r2") or float("nan"),
+            f"{pm.get('r2_oos'):.4f}" if pm.get("r2_oos") is not None else "n/a",
             f"{pm.get('ic_mean'):.4f}" if pm.get("ic_mean") is not None else "n/a",
+            pm.get("ranking_identified"),
             pm.get("n_obs"),
         )
 
@@ -1259,8 +1316,13 @@ def run_walk_forward_markov(
         "mae": pm.get("mae") if stock_level else None,
         "mse": pm.get("mse") if stock_level else None,
         "r2": pm.get("r2") if stock_level else None,
+        "r2_oos": pm.get("r2_oos") if stock_level else None,
         "ic_mean": pm.get("ic_mean") if stock_level else None,
         "long_short_mean": pm.get("long_short_mean") if stock_level else None,
+        "long_short_sharpe": pm.get("long_short_sharpe") if stock_level else None,
+        "topk_avg_return": pm.get("topk_avg_return") if stock_level else None,
+        "topk_edge": pm.get("topk_edge") if stock_level else None,
+        "hit_rate": pm.get("hit_rate") if stock_level else None,
         "n_obs": pm.get("n_obs") if stock_level else None,
         "n_steps_ok": int((summary["status"] == "ok").sum()),
         "output_dir": str(WF_DIR if stock_level else MARKET_DIR),
@@ -1375,8 +1437,14 @@ def _markov_row_from_bundle(
         "MAE": metrics.get("mae") if metrics else None,
         "MSE": metrics.get("mse") if metrics else None,
         "R2": metrics.get("r2") if metrics else None,
-        "IC_Spearman": None,
-        "Long_short_EW": None,
+        "R2_oos": metrics.get("r2_oos") if metrics else None,
+        "IC_Spearman": metrics.get("ic_mean") if metrics else None,
+        "Long_short_EW": metrics.get("long_short_mean") if metrics else None,
+        "Long_short_Sharpe": metrics.get("long_short_sharpe") if metrics else None,
+        "Top50_mean": metrics.get("topk_avg_return") if metrics else None,
+        "Top50_edge": metrics.get("topk_edge") if metrics else None,
+        "Hit_rate": metrics.get("hit_rate") if metrics else None,
+        "ranking_identified": metrics.get("ranking_identified") if metrics else False,
         "n_obs": n_obs,
     }
 
@@ -1453,11 +1521,17 @@ def write_h1_comparison(
             "RMSE_mean_year": ff5_step_rmse,
             "RMSE_median_year": ff5_step_rmse_med,
             "RMSE_pooled": None,
-            "MAE": None,
-            "MSE": None,
-            "R2": None,
+            "MAE": _safe_float(ff5_ok["mae"].mean()) if len(ff5_ok) and "mae" in ff5_ok.columns else None,
+            "MSE": _safe_float(ff5_ok["mse"].mean()) if len(ff5_ok) and "mse" in ff5_ok.columns else None,
+            "R2": _safe_float(ff5_ok["r2"].mean()) if len(ff5_ok) and "r2" in ff5_ok.columns else None,
+            "R2_oos": _safe_float(ff5_ok["r2_oos"].mean()) if len(ff5_ok) and "r2_oos" in ff5_ok.columns else None,
             "IC_Spearman": None,
             "Long_short_EW": None,
+            "Long_short_Sharpe": None,
+            "Top50_mean": None,
+            "Top50_edge": None,
+            "Hit_rate": None,
+            "ranking_identified": False,
             "n_obs": n_ff5,
         },
         {
@@ -1469,8 +1543,14 @@ def write_h1_comparison(
             "MAE": None,
             "MSE": None,
             "R2": None,
+            "R2_oos": None,
             "IC_Spearman": _safe_float(xgb_avg.get("ic")) if xgb_avg is not None else None,
             "Long_short_EW": _safe_float(xgb_avg.get("long_short")) if xgb_avg is not None else None,
+            "Long_short_Sharpe": None,
+            "Top50_mean": None,
+            "Top50_edge": None,
+            "Hit_rate": None,
+            "ranking_identified": None,
             "n_obs": n_xgb,
         },
         {
@@ -1486,28 +1566,36 @@ def write_h1_comparison(
             "R2": lstm_step_r2 if lstm_step_r2 is not None else (
                 _safe_float(lstm_avg.get("r2")) if lstm_avg is not None else None
             ),
+            "R2_oos": None,
             "IC_Spearman": _safe_float(lstm_avg.get("ic")) if lstm_avg is not None else None,
             "Long_short_EW": _safe_float(lstm_avg.get("long_short")) if lstm_avg is not None else None,
+            "Long_short_Sharpe": None,
+            "Top50_mean": None,
+            "Top50_edge": None,
+            "Hit_rate": None,
+            "ranking_identified": None,
             "n_obs": n_lstm,
         },
     ])
 
-    # Fill FF5 pooled from final-test pooled file if present
-    ff5_pooled_path = (
-        MANUAL_ROOT / "final test results" / "ff5" / "walk_forward_baseline"
-        / "pooled_oos_predictions.csv"
-    )
-    if ff5_pooled_path.is_file():
+    if FF5_POOLED.is_file():
         try:
-            ff5_pooled = pd.read_csv(ff5_pooled_path)
-            from evaluation.predictive import predictive_metrics as _pm
-            fpm = _pm(ff5_pooled["y_true"].values, ff5_pooled["y_pred"].values)
+            ff5_pooled = pd.read_csv(FF5_POOLED)
+            fpm = pooled_metrics(ff5_pooled)
             for r in rows:
                 if r["Model"].startswith("Fama-French"):
                     r["RMSE_pooled"] = fpm.get("rmse")
                     r["MAE"] = fpm.get("mae")
                     r["MSE"] = fpm.get("mse")
                     r["R2"] = fpm.get("r2")
+                    r["R2_oos"] = fpm.get("r2_oos")
+                    r["IC_Spearman"] = fpm.get("ic_mean")
+                    r["Long_short_EW"] = fpm.get("long_short_mean")
+                    r["Long_short_Sharpe"] = fpm.get("long_short_sharpe")
+                    r["Top50_mean"] = fpm.get("topk_avg_return")
+                    r["Top50_edge"] = fpm.get("topk_edge")
+                    r["Hit_rate"] = fpm.get("hit_rate")
+                    r["ranking_identified"] = bool(fpm.get("ranking_identified"))
                     if r["n_obs"] is None:
                         r["n_obs"] = fpm.get("n_obs")
         except Exception as exc:
@@ -1616,7 +1704,11 @@ def write_h1_comparison(
         "- k=2 is the frozen H1 Hamilton baseline; k=4 is the ERP Maheu-motivated extension "
           "(unconstrained MS with mean-sorted labels — not the full hierarchical Maheu sampler).",
         "- Markov/FF5 use market-wide factors => within-month `y_pred` has little cross-section; "
-          "compare these on RMSE. Use XGB/LSTM for ranking metrics.",
+          "ranking (IC, long-short, Top-50, hit rate) is n/a when `ranking_identified=False`. "
+          "Compare Markov vs FF5 on RMSE/MAE/R2/R2_oos. Use XGB/LSTM for ranking metrics.",
+        "- Ten H1 metrics match fama5.py: RMSE, MAE, R2, Gu R2_oos, Spearman IC, "
+          "long-short mean, long-short Sharpe, Top-50 mean, Top-50 edge, hit rate.",
+        "- Regime WLS and pooled FF5 fits use HAC(4) standard errors (point estimates unchanged).",
         "- Market-level Hamilton forecasts: `market_appendix/` (k=2) and `market_appendix_k4/` (k=4).",
         "- Prefer **median year RMSE**; pooled/mean can be dominated by 2014 extremes.",
         "",
@@ -2191,6 +2283,8 @@ def write_readme(log_path: Path | None = None) -> Path:
             f"fallback={ALLOW_POOLED_FALLBACK}",
             "",
             "Primary (H1): soft + filtered + rolling + mkt_rf + pooled fallback",
+            "H1 metrics aligned with fama5.py; WLS/pooled OLS HAC(4).",
+            f"FF5 summary: {FF5_SUMMARY}",
             "R1: --train-assign hard",
             "R2: --train-prob-source smoothed",
             "R4: --market-series ew_excess",

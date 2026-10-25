@@ -1,0 +1,13 @@
+﻿Markov H1 rerun — 2026-08-20
+============================
+Script: methodology/model manul code/marvok/markov_switching.py
+Spec: soft + filtered + rolling + mkt_rf + pooled fallback
+k=2 log: markov_run_20260820_181921.txt
+k=4 log: markov_run_20260820_182001.txt
+Master console: rerun_master_20260820_181908.txt
+
+POOLED OOS:
+  k=2 RMSE=0.1071 MAE=0.0690 R2=-0.0148 R2_oos=-0.0105 n=76373
+  k=4 RMSE=0.1094 MAE=0.0717 R2=-0.0592 R2_oos=-0.0546 n=76373
+Mean year RMSE: k2=0.1049  k4=0.1073
+Matches 2026-08-15 freeze.

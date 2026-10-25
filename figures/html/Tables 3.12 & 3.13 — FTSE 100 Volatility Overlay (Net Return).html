@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!-- saved from url=(0091)file:///C:/Users/Faiaz/Desktop/Courses/sem2/dessertation/h3b_volatility_overlay_charts.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Tables 3.12 &amp; 3.13 — FTSE 100 Volatility Overlay (Net Return)</title>
+<style>
+  :root {
+    --garch: #495057;
+    --gew: #f08c00;
+    --lstm: #1864ab;
+    --unscaled: #adb5bd;
+    --overlay: #2f9e44;
+    --ink: #212529;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    margin: 0;
+    padding: 30px 26px 50px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 22px; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 13.5px; margin-bottom: 20px; }
+
+  .legend { display: flex; justify-content: center; gap: 26px; margin-bottom: 18px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+
+  .chart-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px 18px 12px; margin-bottom: 24px; }
+  .chart-title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 2px; }
+  .chart-sub { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+
+  .panel-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .panel-row.mlbl-highlight > div:last-child svg { background: #f3faf4; border-radius: 10px; }
+
+  .note-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 4px; margin-bottom: 22px; }
+  .note { border-radius: 10px; padding: 12px 15px; font-size: 13px; line-height: 1.55; }
+  .note.a { background: #ebfbee; border-left: 4px solid var(--overlay); }
+  .note.b { background: #fff4e6; border-left: 4px solid var(--gew); }
+  .note.c { background: #f8f9fa; border-left: 4px solid var(--garch); grid-column: 1 / -1; }
+  .note b { color: var(--ink); }
+
+  footer { text-align: center; color: var(--muted); font-size: 11.5px; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Volatility Overlay — Net Return, by Volatility Model</h1>
+  <div class="subtitle">FTSE 100, H3b · every strategy tested with 3 different ways of estimating volatility to set the exposure scale</div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch" style="background:var(--garch)"></span>GARCH(1,1)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--gew)"></span>GEW (GARCH+EGARCH+EWMA blend)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--lstm)"></span>LSTM-95</div>
+  </div>
+
+  <!-- ================= CHART A: ACADEMIC NET RETURN ================= -->
+  <div class="chart-card">
+    <div class="chart-title">Table 3.12 — Net Return With Overlay, Academic Costs (10bps)</div>
+    <div class="chart-sub">same 0–20% scale on every panel, so bar heights are directly comparable across strategies</div>
+
+    <div class="panel-row">
+
+      <!-- 1/N -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle">1/N</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">20%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="105.0" width="30" height="85.0" fill="var(--garch)"></rect>
+          <text x="55" y="98" font-size="12" font-weight="800" text-anchor="middle">10.0%</text>
+          <rect x="80" y="106.7" width="30" height="83.3" fill="var(--gew)"></rect>
+          <text x="95" y="100" font-size="12" font-weight="800" text-anchor="middle">9.8%</text>
+          <rect x="120" y="108.4" width="30" height="81.6" fill="var(--lstm)"></rect>
+          <text x="135" y="102" font-size="12" font-weight="800" text-anchor="middle">9.6%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- Min-Var -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle">Min-Var</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">20%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="80.35" width="30" height="109.65" fill="var(--garch)"></rect>
+          <text x="55" y="74" font-size="12" font-weight="800" text-anchor="middle">12.9%</text>
+          <rect x="80" y="81.2" width="30" height="108.8" fill="var(--gew)"></rect>
+          <text x="95" y="75" font-size="12" font-weight="800" text-anchor="middle">12.8%</text>
+          <rect x="120" y="83.75" width="30" height="106.25" fill="var(--lstm)"></rect>
+          <text x="135" y="77" font-size="12" font-weight="800" text-anchor="middle">12.5%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- Top-50 Ensemble -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle">Top-50 Ensemble</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">20%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="99.9" width="30" height="90.1" fill="var(--garch)"></rect>
+          <text x="55" y="93" font-size="12" font-weight="800" text-anchor="middle">10.6%</text>
+          <rect x="80" y="101.6" width="30" height="88.4" fill="var(--gew)"></rect>
+          <text x="95" y="95" font-size="12" font-weight="800" text-anchor="middle">10.4%</text>
+          <rect x="120" y="101.6" width="30" height="88.4" fill="var(--lstm)"></rect>
+          <text x="135" y="95" font-size="12" font-weight="800" text-anchor="middle">10.4%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- ML-BL -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%; background:#f3faf4; border-radius:10px;">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle" fill="#2f9e44">ML-BL</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">20%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="31.05" width="30" height="158.95" fill="var(--garch)"></rect>
+          <text x="55" y="25" font-size="12" font-weight="800" text-anchor="middle">18.7%</text>
+          <rect x="80" y="32.75" width="30" height="157.25" fill="var(--gew)"></rect>
+          <text x="95" y="27" font-size="12" font-weight="800" text-anchor="middle">18.5%</text>
+          <rect x="120" y="36.15" width="30" height="153.85" fill="var(--lstm)"></rect>
+          <text x="135" y="30" font-size="12" font-weight="800" text-anchor="middle">18.1%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= CHART B: REALISTIC NET RETURN ================= -->
+  <div class="chart-card">
+    <div class="chart-title">Table 3.13 — Net Return With Overlay, Realistic Costs</div>
+    <div class="chart-sub">same 0–10% scale on every panel · note Top-50 Ensemble collapses even with the overlay</div>
+
+    <div class="panel-row">
+
+      <!-- 1/N -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle">1/N</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">10%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="69.3" width="30" height="120.7" fill="var(--garch)"></rect>
+          <text x="55" y="63" font-size="12" font-weight="800" text-anchor="middle">7.1%</text>
+          <rect x="80" y="71.0" width="30" height="119.0" fill="var(--gew)"></rect>
+          <text x="95" y="65" font-size="12" font-weight="800" text-anchor="middle">7.0%</text>
+          <rect x="120" y="82.9" width="30" height="107.1" fill="var(--lstm)"></rect>
+          <text x="135" y="77" font-size="12" font-weight="800" text-anchor="middle">6.3%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- Min-Var -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle">Min-Var</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">10%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="40.4" width="30" height="149.6" fill="var(--garch)"></rect>
+          <text x="55" y="34" font-size="12" font-weight="800" text-anchor="middle">8.8%</text>
+          <rect x="80" y="40.4" width="30" height="149.6" fill="var(--gew)"></rect>
+          <text x="95" y="34" font-size="12" font-weight="800" text-anchor="middle">8.8%</text>
+          <rect x="120" y="48.9" width="30" height="141.1" fill="var(--lstm)"></rect>
+          <text x="135" y="43" font-size="12" font-weight="800" text-anchor="middle">8.3%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- Top-50 Ensemble -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle" fill="#e03131">Top-50 Ensemble</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">10%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="162.8" width="30" height="27.2" fill="var(--garch)"></rect>
+          <text x="55" y="156" font-size="12" font-weight="800" text-anchor="middle">1.6%</text>
+          <rect x="80" y="166.2" width="30" height="23.8" fill="var(--gew)"></rect>
+          <text x="95" y="160" font-size="12" font-weight="800" text-anchor="middle">1.4%</text>
+          <rect x="120" y="167.9" width="30" height="22.1" fill="var(--lstm)"></rect>
+          <text x="135" y="162" font-size="12" font-weight="800" text-anchor="middle">1.3%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+      <!-- ML-BL -->
+      <div>
+        <svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" style="width:100%; background:#f3faf4; border-radius:10px;">
+          <text x="105" y="14" font-size="13" font-weight="800" text-anchor="middle" fill="#2f9e44">ML-BL</text>
+          <text x="22" y="24" font-size="9.5" fill="#868e96" text-anchor="end">10%</text>
+          <text x="22" y="194" font-size="9.5" fill="#868e96" text-anchor="end">0%</text>
+          <line x1="25" y1="20" x2="25" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <line x1="25" y1="190" x2="165" y2="190" stroke="#adb5bd" stroke-width="1.2"></line>
+          <rect x="40" y="105.0" width="30" height="85.0" fill="var(--garch)"></rect>
+          <text x="55" y="99" font-size="12" font-weight="800" text-anchor="middle">5.0%</text>
+          <rect x="80" y="110.1" width="30" height="79.9" fill="var(--gew)"></rect>
+          <text x="95" y="104" font-size="12" font-weight="800" text-anchor="middle">4.7%</text>
+          <rect x="120" y="113.5" width="30" height="76.5" fill="var(--lstm)"></rect>
+          <text x="135" y="107" font-size="12" font-weight="800" text-anchor="middle">4.5%</text>
+          <text x="55" y="204" font-size="9.5" text-anchor="middle">GARCH</text>
+          <text x="95" y="204" font-size="9.5" text-anchor="middle">GEW</text>
+          <text x="135" y="204" font-size="9.5" text-anchor="middle">LSTM95</text>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= CHART C: ML-BL RESCUE, NET RETURN ================= -->
+  <div class="chart-card">
+    <div class="chart-title">The ML-BL Rescue: Net Return With and Without the Overlay</div>
+    <div class="chart-sub">averaged across the 3 overlay models · grey = unscaled (Table 3.10), green = with volatility overlay</div>
+    <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <line x1="60" y1="30" x2="860" y2="30" stroke="#f1f3f5" stroke-width="1"></line>
+      <line x1="60" y1="30" x2="60" y2="280" stroke="#adb5bd" stroke-width="1.5"></line>
+      <line x1="60" y1="222.31" x2="860" y2="222.31" stroke="#adb5bd" stroke-width="1.5"></line>
+      <text x="44" y="34" font-size="10.5" fill="#868e96" text-anchor="end">20%</text>
+      <text x="44" y="226" font-size="10.5" fill="#868e96" text-anchor="end">0%</text>
+      <text x="44" y="278" font-size="10.5" fill="#868e96" text-anchor="end">−6%</text>
+
+      <!-- Academic Unscaled: 7.5% -->
+      <rect x="105" y="150.2" width="90" height="72.1" fill="var(--unscaled)"></rect>
+      <text x="150" y="143" font-size="15" text-anchor="middle" font-weight="800">7.5%</text>
+      <text x="150" y="299" font-size="10.5" text-anchor="middle">Academic, unscaled</text>
+      <text x="150" y="311" font-size="9.5" text-anchor="middle" fill="var(--muted)">Sharpe 0.36 · MDD −36.2%</text>
+
+      <!-- Academic + Overlay: 18.4% -->
+      <rect x="305" y="45.1" width="90" height="177.2" fill="var(--overlay)"></rect>
+      <text x="350" y="38" font-size="15" text-anchor="middle" font-weight="800">18.4%</text>
+      <text x="350" y="299" font-size="10.5" text-anchor="middle">Academic + overlay</text>
+      <text x="350" y="311" font-size="9.5" text-anchor="middle" fill="var(--muted)">Sharpe ~1.12 · MDD ~−19%</text>
+
+      <!-- Realistic Unscaled: -5.5% -->
+      <rect x="505" y="222.31" width="90" height="52.9" fill="var(--unscaled)"></rect>
+      <text x="550" y="290" font-size="15" text-anchor="middle" font-weight="800">−5.5%</text>
+      <text x="550" y="299" font-size="10.5" text-anchor="middle" dy="14">Realistic, unscaled</text>
+      <text x="550" y="311" font-size="9.5" text-anchor="middle" dy="14" fill="var(--muted)">Sharpe −0.38 · MDD −70.8%</text>
+
+      <!-- Realistic + Overlay: 4.7% -->
+      <rect x="705" y="176.8" width="90" height="45.5" fill="var(--overlay)"></rect>
+      <text x="750" y="170" font-size="15" text-anchor="middle" font-weight="800">4.7%</text>
+      <text x="750" y="299" font-size="10.5" text-anchor="middle">Realistic + overlay</text>
+      <text x="750" y="311" font-size="9.5" text-anchor="middle" fill="var(--muted)">Sharpe ~0.22 · MDD ~−30%</text>
+    </svg>
+  </div>
+
+  <div class="note-row">
+    <div class="note a"><b>Which volatility model you use barely matters.</b> For every strategy, GARCH, GEW and LSTM-95 produce net returns within 0.2–1.0 percentage points of each other. LSTM-95 is consistently the most cautious (lowest net return, because it scales exposure down the hardest), GARCH is consistently the most aggressive (highest net return). The choice of overlay model is a minor tuning knob — not the thing driving results.</div>
+    <div class="note b"><b>Realistic costs cut every strategy's net return roughly in half or worse.</b> 1/N: 10.0%→7.1%. Min-Var: 12.9%→8.8%. ML-BL: 18.7%→5.0%. Top-50 Ensemble is hit hardest of all: 10.6%→1.6%, effectively wiped out. The overlay does not protect against turnover-driven costs — it only protects against volatility-driven drawdowns.</div>
+    <div class="note c"><b>Bottom line:</b> the overlay is what makes ML-BL the standout strategy under realistic costs (4.5–5.0% net, vs. near-zero or negative for the ranking books), but it cannot rescue a strategy whose edge was already eaten by trading costs. Min-Var remains the most "boring but reliable" option (8.3–8.8% net regardless of overlay model); Top-50 Ensemble is a strategy that only works in a zero-cost academic world.</div>
+  </div>
+
+  <footer>Source: Table 3.12 (FTSE 100, academic volatility overlay) and Table 3.13 (FTSE 100, realistic volatility overlay). ML-BL unscaled baselines from Table 3.10.</footer>
+</div>
+
+
+</body></html>

@@ -1,0 +1,7 @@
+variable,n_raw,n_missing,pct_missing
+MKT_RF,125397,0,0.0
+SMB,125397,0,0.0
+HML,125397,0,0.0
+RMW,125397,0,0.0
+CMA,125397,0,0.0
+target_excess_return,125397,953,0.7599862835634026

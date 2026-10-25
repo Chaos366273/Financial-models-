@@ -1,0 +1,4 @@
+Model,construction,EW_long_short,EW_std,VW_long_short,VW_std,n_months_EW,n_months_VW,n_obs,note
+Fama-French 5 (panel OLS),top/bottom 10% by y_pred each month,,,,,0.0,0.0,76373.0,n/a for ranking: market-wide factors => constant cross-section y_pred; months without pred dispersion skipped
+LSTM,top/bottom 10% by y_pred each month,0.004147016421531403,0.038498577106334225,-0.003392220965130104,0.04947750516401188,167.0,167.0,58622.0,scored on LSTM preview stock-months
+XGBoost (B_drop_bottom9),top/bottom 10% by y_pred each month,0.0109692600766973,,,,,,,EW from walk-forward summary AVERAGE; VW N/A (full preview.csv not saved)

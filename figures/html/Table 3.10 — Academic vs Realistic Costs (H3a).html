@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!-- saved from url=(0084)file:///C:/Users/Faiaz/Desktop/Courses/sem2/dessertation/h3a_cost_impact_charts.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Table 3.10 — Academic vs Realistic Costs (H3a)</title>
+<style>
+  :root {
+    --trad: #1864ab;
+    --ml: #f08c00;
+    --mlbl: #e03131;
+    --ink: #212529;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    margin: 0;
+    padding: 30px 26px 50px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 22px; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 13.5px; margin-bottom: 8px; }
+  .subtitle2 { text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 22px; }
+
+  .legend { display: flex; justify-content: center; gap: 24px; margin-bottom: 14px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot.hollow { background: #fff; border: 2.5px solid #495057; }
+  .dot.filled { background: #495057; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  .chart-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px 10px; margin-bottom: 22px; }
+  .chart-title { font-size: 14.5px; font-weight: 700; text-align: center; margin-bottom: 2px; }
+  .chart-sub { font-size: 11.5px; color: var(--muted); text-align: center; margin-bottom: 8px; }
+
+  .note-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 4px; margin-bottom: 22px; }
+  .note { border-radius: 10px; padding: 12px 15px; font-size: 13px; line-height: 1.55; }
+  .note.a { background: #e7f5ff; border-left: 4px solid var(--trad); }
+  .note.b { background: #fff4e6; border-left: 4px solid var(--ml); }
+  .note.c { background: #fff5f5; border-left: 4px solid var(--mlbl); grid-column: 1 / -1; }
+  .note b { color: var(--ink); }
+
+  .tip {
+    background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 12px;
+    padding: 16px 20px; font-size: 13.5px; line-height: 1.6; margin-top: 6px;
+  }
+  .tip h3 { margin-top: 0; font-size: 15px; }
+  .tip b { color: var(--ink); }
+  .tip ul { margin: 8px 0 0; padding-left: 20px; }
+  .tip li { margin-bottom: 6px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 11.5px; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Table 3.10 — What Happens When Realistic Costs Are Applied</h1>
+  <div class="subtitle">FTSE 100, H3a · academic 10bps flat cost vs realistic name-level, liquidity-based cost</div>
+  <div class="subtitle2">Rows sorted top-to-bottom by realistic net return, so the "traditional survives / ML collapses" pattern reads directly down the page</div>
+
+  <!-- CHART 1: Net Return dumbbell -->
+  <div class="chart-card">
+    <div class="chart-title">Net Annual Return: Academic Costs → Realistic Costs</div>
+    <div class="chart-sub">hollow dot = academic (10bps) · filled dot = realistic (name-level) · the line length is the actual cost damage</div>
+    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <line x1="415.8" y1="45" x2="415.8" y2="480" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3"></line>
+      <text x="415.8" y="35" font-size="11" fill="#868e96" text-anchor="middle">0%</text>
+
+      <!-- 1/N -->
+      <line x1="723.8" y1="70" x2="786.8" y2="70" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="786.8" cy="70" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="723.8" cy="70" r="7" fill="var(--trad)"></circle>
+      <text x="720" y="66" font-size="11.5" text-anchor="end" font-weight="700">8.0%</text>
+      <text x="790" y="66" font-size="11" text-anchor="start" fill="var(--muted)">9.4%</text>
+      <text x="60" y="74" font-size="12.5" font-weight="700">1/N</text>
+
+      <!-- BL (No Views) -->
+      <line x1="696.0" y1="125" x2="747.4" y2="125" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="747.4" cy="125" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="696.0" cy="125" r="7" fill="var(--trad)"></circle>
+      <text x="692" y="121" font-size="11.5" text-anchor="end" font-weight="700">7.1%</text>
+      <text x="751" y="121" font-size="11" text-anchor="start" fill="var(--muted)">8.4%</text>
+      <text x="60" y="129" font-size="12.5" font-weight="700">BL (No Views)</text>
+
+      <!-- MVO -->
+      <line x1="684.2" y1="180" x2="806.6" y2="180" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="806.6" cy="180" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="684.2" cy="180" r="7" fill="var(--trad)"></circle>
+      <text x="680" y="176" font-size="11.5" text-anchor="end" font-weight="700">6.8%</text>
+      <text x="810" y="176" font-size="11" text-anchor="start" fill="var(--muted)">9.9%</text>
+      <text x="60" y="184" font-size="12.5" font-weight="700">MVO</text>
+
+      <!-- Min-Var -->
+      <line x1="672.3" y1="235" x2="771.0" y2="235" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="771.0" cy="235" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="672.3" cy="235" r="7" fill="var(--trad)"></circle>
+      <text x="668" y="231" font-size="11.5" text-anchor="end" font-weight="700">6.5%</text>
+      <text x="775" y="231" font-size="11" text-anchor="start" fill="var(--muted)">9.0%</text>
+      <text x="60" y="239" font-size="12.5" font-weight="700">Min-Var</text>
+
+      <!-- Top-50 Ensemble -->
+      <line x1="526.5" y1="290" x2="798.7" y2="290" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="798.7" cy="290" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="526.5" cy="290" r="7" fill="var(--ml)"></circle>
+      <text x="522" y="286" font-size="11.5" text-anchor="end" font-weight="700">2.8%</text>
+      <text x="802" y="286" font-size="11" text-anchor="start" fill="var(--muted)">9.7%</text>
+      <text x="60" y="294" font-size="12.5" font-weight="700">Top-50 Ensemble</text>
+
+      <!-- Top-50 LSTM -->
+      <line x1="478.9" y1="345" x2="700.0" y2="345" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="700.0" cy="345" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="478.9" cy="345" r="7" fill="var(--ml)"></circle>
+      <text x="474" y="341" font-size="11.5" text-anchor="end" font-weight="700">1.6%</text>
+      <text x="704" y="341" font-size="11" text-anchor="start" fill="var(--muted)">7.2%</text>
+      <text x="60" y="349" font-size="12.5" font-weight="700">Top-50 LSTM</text>
+
+      <!-- Top-50 XGB -->
+      <line x1="467.1" y1="400" x2="794.8" y2="400" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="794.8" cy="400" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="467.1" cy="400" r="7" fill="var(--ml)"></circle>
+      <text x="463" y="396" font-size="11.5" text-anchor="end" font-weight="700">1.3%</text>
+      <text x="798" y="396" font-size="11" text-anchor="start" fill="var(--muted)">9.6%</text>
+      <text x="60" y="404" font-size="12.5" font-weight="700">Top-50 XGB</text>
+
+      <!-- ML-BL -->
+      <line x1="198.7" y1="455" x2="711.8" y2="455" stroke="var(--mlbl)" stroke-width="3.5"></line>
+      <circle cx="711.8" cy="455" r="7" fill="none" stroke="var(--mlbl)" stroke-width="2.5"></circle>
+      <circle cx="198.7" cy="455" r="8" fill="var(--mlbl)"></circle>
+      <text x="194" y="451" font-size="12" text-anchor="end" font-weight="700" fill="var(--mlbl)">−5.5%</text>
+      <text x="716" y="451" font-size="11" text-anchor="start" fill="var(--muted)">7.5%</text>
+      <text x="60" y="459" font-size="12.5" font-weight="700" fill="var(--mlbl)">ML-BL</text>
+    </svg>
+  </div>
+
+  <!-- CHART 2: Sharpe dumbbell -->
+  <div class="chart-card">
+    <div class="chart-title">Sharpe Ratio: Academic Costs → Realistic Costs</div>
+    <div class="chart-sub">same row order as above · a Sharpe near 0 means the strategy's edge has been cancelled out by trading costs</div>
+    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <line x1="388.5" y1="45" x2="388.5" y2="480" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3"></line>
+      <text x="388.5" y="35" font-size="11" fill="#868e96" text-anchor="middle">Sharpe = 0</text>
+
+      <!-- 1/N -->
+      <line x1="676.9" y1="70" x2="746.1" y2="70" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="746.1" cy="70" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="676.9" cy="70" r="7" fill="var(--trad)"></circle>
+      <text x="673" y="66" font-size="11.5" text-anchor="end" font-weight="700">0.50</text>
+      <text x="750" y="66" font-size="11" text-anchor="start" fill="var(--muted)">0.62</text>
+      <text x="60" y="74" font-size="12.5" font-weight="700">1/N</text>
+
+      <!-- BL (No Views) -->
+      <line x1="654.0" y1="125" x2="711.5" y2="125" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="711.5" cy="125" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="654.0" cy="125" r="7" fill="var(--trad)"></circle>
+      <text x="650" y="121" font-size="11.5" text-anchor="end" font-weight="700">0.46</text>
+      <text x="715" y="121" font-size="11" text-anchor="start" fill="var(--muted)">0.56</text>
+      <text x="60" y="129" font-size="12.5" font-weight="700">BL (No Views)</text>
+
+      <!-- MVO -->
+      <line x1="625.0" y1="180" x2="763.9" y2="180" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="763.9" cy="180" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="625.0" cy="180" r="7" fill="var(--trad)"></circle>
+      <text x="621" y="176" font-size="11.5" text-anchor="end" font-weight="700">0.41</text>
+      <text x="768" y="176" font-size="11" text-anchor="start" fill="var(--muted)">0.65</text>
+      <text x="60" y="184" font-size="12.5" font-weight="700">MVO</text>
+
+      <!-- Min-Var -->
+      <line x1="654.0" y1="235" x2="786.5" y2="235" stroke="var(--trad)" stroke-width="3"></line>
+      <circle cx="786.5" cy="235" r="7" fill="none" stroke="var(--trad)" stroke-width="2.5"></circle>
+      <circle cx="654.0" cy="235" r="7" fill="var(--trad)"></circle>
+      <text x="650" y="231" font-size="11.5" text-anchor="end" font-weight="700">0.46</text>
+      <text x="790" y="231" font-size="11" text-anchor="start" fill="var(--muted)">0.69</text>
+      <text x="60" y="239" font-size="12.5" font-weight="700">Min-Var</text>
+
+      <!-- Top-50 Ensemble -->
+      <line x1="452.0" y1="290" x2="740.4" y2="290" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="740.4" cy="290" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="452.0" cy="290" r="7" fill="var(--ml)"></circle>
+      <text x="448" y="286" font-size="11.5" text-anchor="end" font-weight="700">0.11</text>
+      <text x="744" y="286" font-size="11" text-anchor="start" fill="var(--muted)">0.61</text>
+      <text x="60" y="294" font-size="12.5" font-weight="700">Top-50 Ensemble</text>
+
+      <!-- Top-50 LSTM -->
+      <line x1="400.0" y1="345" x2="648.1" y2="345" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="648.1" cy="345" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="400.0" cy="345" r="7" fill="var(--ml)"></circle>
+      <text x="396" y="341" font-size="11.5" text-anchor="end" font-weight="700">0.02</text>
+      <text x="652" y="341" font-size="11" text-anchor="start" fill="var(--muted)">0.45</text>
+      <text x="60" y="349" font-size="12.5" font-weight="700">Top-50 LSTM</text>
+
+      <!-- Top-50 XGB -->
+      <line x1="388.5" y1="400" x2="728.8" y2="400" stroke="var(--ml)" stroke-width="3"></line>
+      <circle cx="728.8" cy="400" r="7" fill="none" stroke="var(--ml)" stroke-width="2.5"></circle>
+      <circle cx="388.5" cy="400" r="7" fill="var(--ml)"></circle>
+      <text x="384" y="396" font-size="11.5" text-anchor="end" font-weight="700">0.00</text>
+      <text x="733" y="396" font-size="11" text-anchor="start" fill="var(--muted)">0.59</text>
+      <text x="60" y="404" font-size="12.5" font-weight="700">Top-50 XGB</text>
+
+      <!-- ML-BL -->
+      <line x1="169.2" y1="455" x2="596.1" y2="455" stroke="var(--mlbl)" stroke-width="3.5"></line>
+      <circle cx="596.1" cy="455" r="7" fill="none" stroke="var(--mlbl)" stroke-width="2.5"></circle>
+      <circle cx="169.2" cy="455" r="8" fill="var(--mlbl)"></circle>
+      <text x="164" y="451" font-size="12" text-anchor="end" font-weight="700" fill="var(--mlbl)">−0.38</text>
+      <text x="600" y="451" font-size="11" text-anchor="start" fill="var(--muted)">0.36</text>
+      <text x="60" y="459" font-size="12.5" font-weight="700" fill="var(--mlbl)">ML-BL</text>
+    </svg>
+    <div class="legend">
+      <div class="legend-item"><span class="dot hollow"></span>Academic cost (10bps flat)</div>
+      <div class="legend-item"><span class="dot filled"></span>Realistic cost (name-level)</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--trad)"></span>Traditional benchmark</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--ml)"></span>ML / ranking strategy</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--mlbl)"></span>ML-BL (turns negative)</div>
+    </div>
+  </div>
+
+  <!-- CHART 3: Cost vs Turnover bar -->
+  <div class="chart-card">
+    <div class="chart-title">Monthly Realistic Cost, and the Turnover Driving It</div>
+    <div class="chart-sub">sorted by monthly cost · the number in brackets is two-sided turnover for that strategy</div>
+    <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <line x1="60" y1="20" x2="60" y2="260" stroke="#adb5bd" stroke-width="1.5"></line>
+      <line x1="60" y1="260" x2="860" y2="260" stroke="#adb5bd" stroke-width="1.5"></line>
+      <text x="30" y="24" font-size="11" fill="#868e96" text-anchor="end">121</text>
+      <text x="30" y="141" font-size="11" fill="#868e96" text-anchor="end">60</text>
+      <text x="42" y="264" font-size="11" fill="#868e96" text-anchor="end">0</text>
+      <text x="15" y="140" font-size="11.5" fill="#495057" text-anchor="middle" transform="rotate(-90 15 140)">monthly cost, bps</text>
+
+      <!-- BL (No Views): 12 bps -->
+      <rect x="76" y="236.2" width="60" height="23.8" fill="var(--trad)"></rect>
+      <text x="106" y="230" font-size="11" text-anchor="middle" font-weight="700">12</text>
+      <text x="106" y="278" font-size="10.5" text-anchor="middle">BL</text>
+      <text x="106" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.07)</text>
+
+      <!-- 1/N: 14 bps -->
+      <rect x="156" y="232.8" width="60" height="27.2" fill="var(--trad)"></rect>
+      <text x="186" y="226" font-size="11" text-anchor="middle" font-weight="700">14</text>
+      <text x="186" y="278" font-size="10.5" text-anchor="middle">1/N</text>
+      <text x="186" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.07)</text>
+
+      <!-- Min-Var: 23 bps -->
+      <rect x="236" y="213.9" width="60" height="46.1" fill="var(--trad)"></rect>
+      <text x="266" y="208" font-size="11" text-anchor="middle" font-weight="700">23</text>
+      <text x="266" y="278" font-size="10.5" text-anchor="middle">Min-Var</text>
+      <text x="266" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.14)</text>
+
+      <!-- MVO: 29 bps -->
+      <rect x="316" y="202.2" width="60" height="57.8" fill="var(--trad)"></rect>
+      <text x="346" y="196" font-size="11" text-anchor="middle" font-weight="700">29</text>
+      <text x="346" y="278" font-size="10.5" text-anchor="middle">MVO</text>
+      <text x="346" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.16)</text>
+
+      <!-- LSTM: 53 bps -->
+      <rect x="396" y="154.1" width="60" height="105.9" fill="var(--ml)"></rect>
+      <text x="426" y="148" font-size="11" text-anchor="middle" font-weight="700">53</text>
+      <text x="426" y="278" font-size="10.5" text-anchor="middle">LSTM</text>
+      <text x="426" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.29)</text>
+
+      <!-- Ensemble: 64 bps -->
+      <rect x="476" y="132.1" width="60" height="127.9" fill="var(--ml)"></rect>
+      <text x="506" y="126" font-size="11" text-anchor="middle" font-weight="700">64</text>
+      <text x="506" y="278" font-size="10.5" text-anchor="middle">Ensemble</text>
+      <text x="506" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.35)</text>
+
+      <!-- XGB: 77 bps -->
+      <rect x="556" y="106.1" width="60" height="153.9" fill="var(--ml)"></rect>
+      <text x="586" y="100" font-size="11" text-anchor="middle" font-weight="700">77</text>
+      <text x="586" y="278" font-size="10.5" text-anchor="middle">XGB</text>
+      <text x="586" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.42)</text>
+
+      <!-- ML-BL: 121 bps -->
+      <rect x="636" y="20" width="60" height="240" fill="var(--mlbl)"></rect>
+      <text x="666" y="14" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--mlbl)">121</text>
+      <text x="666" y="278" font-size="10.5" text-anchor="middle" font-weight="700" fill="var(--mlbl)">ML-BL</text>
+      <text x="666" y="291" font-size="9.5" text-anchor="middle" fill="var(--muted)">(TO 0.64)</text>
+    </svg>
+  </div>
+
+  <div class="note-row">
+    <div class="note a"><b>Traditional benchmarks barely move.</b> 1/N, Min-Var, MVO and BL(No Views) all keep positive, respectable Sharpe ratios under realistic costs (0.41–0.50) because their turnover is low (0.07–0.16) — there's simply little to erode.</div>
+    <div class="note b"><b>Ranking strategies collapse, they don't just shrink.</b> Top-50 XGBoost's net return falls from 9.6% to 1.3% and its Sharpe falls to essentially zero (0.00) — monthly costs of 77bps (≈9.2% a year) consume almost the entire gross return. Gross returns barely move; it's the realistic cost drag that kills the result.</div>
+    <div class="note c"><b>ML-BL is the cautionary tale of the table.</b> Its turnover (0.64) is roughly 4–9× higher than every other strategy, and each unit of that turnover costs more too (name-level cost, not the flat 10bps academic assumption) — together that produces 121bps/month in costs (≈14.5% a year), turning a positive academic Sharpe (0.36) into the only <b>negative</b> net return (−5.5%) and a catastrophic −70.8% drawdown.</div>
+  </div>
+
+  <div class="tip">
+    <h3>How to present this in your report</h3>
+    <ul>
+      <li><b>Keep Table 3.10 as an appendix table</b> (for the reader who wants the exact numbers), but lead the main text with these charts — a professor scanning the section should get the finding from the shape of the chart in 2 seconds, not from reading 64 cells.</li>
+      <li><b>Lead with the dumbbell charts, not the bar chart.</b> The "before → after" gap is your actual finding (statistical ranking skill doesn't survive realistic costs); the cost/turnover bar chart is the mechanism explaining <i>why</i>, so it works well as the second chart, right after you've shown the reader the effect.</li>
+      <li><b>One sentence per chart underneath, not a full paragraph.</b> You already have strong analytical prose written (the text you pasted) — keep that in the body copy, and let the chart carry the "wow, look how far that fell" moment on its own.</li>
+      <li><b>Colour-code consistently across all three charts</b> (blue = traditional, orange = ML, red = ML-BL) so your professor's eye learns the code once and reuses it instantly on the next chart.</li>
+    </ul>
+  </div>
+
+  <footer>Source: Table 3.10, FTSE 100 — Academic vs Realistic Costs (H3a, Unscaled).</footer>
+</div>
+
+
+</body></html>

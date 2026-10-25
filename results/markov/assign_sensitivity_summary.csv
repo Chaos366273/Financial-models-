@@ -1,0 +1,5 @@
+spec,rmse_mean_year,rmse_median_year,rmse_pooled,mae_pooled,n_obs,n_steps_ok,path
+k2_soft,0.10486184836171851,0.10190947491949975,0.10712780387554409,0.06900332590178732,76373,14,C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_baseline
+k2_hard,0.30895195326906716,0.10412988975517665,0.7973532491680065,0.07245374045984707,76374,14,C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_hard_k2
+k4_soft,0.1073175920764439,0.10469223760358196,0.10944187490487774,0.07167369928686798,76373,14,C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_k4
+k4_hard,0.3284395015934517,0.11952150802088629,0.8006592664580097,0.09294344436922755,76374,14,C:\Users\Faiaz\Desktop\Courses\sem2\dessertation\methodology\model manul code\marvok\walk_forward_hard_k4

@@ -1,13 +1,14 @@
 """
-Rolling walk-forward for frozen XGB B_drop_bottom9.
+Rolling walk-forward for frozen XGB kitchen-sink (H1).
 
 Two parallel experiments (identical windows / HPs / target):
-  A) Baseline — 19 features (no sentiment)
-  B) Sentiment — same 19 + Bloomberg sentiment columns
+  A) Baseline — kitchen_sink (no sentiment)
+  B) Sentiment — kitchen_sink + Bloomberg sentiment columns
 
-Also runs FINAL-TEST-STYLE (optional, on by default):
-  train months <= 2023-12, score 2024+  (same protocol as xgb_return --final-test)
-  Does NOT write / clear / write the golden-rule lock.
+Then SHAP persistence prune (top-15 mean|SHAP| in >= 8 of 14 steps) and re-score.
+
+Final-test-style (train<=2023, score 2024+) is OFF by default. Opt in with --final-style.
+Does NOT write the golden-rule lock.
 
 Outputs under:
   final test results/xgboost 2/...
@@ -48,7 +49,8 @@ LOCKED_PARAMS = {
     "subsample": 0.80,
     "colsample_bytree": 0.80,
 }
-BASELINE_COLS = [
+# Archive only — H1 kitchen-sink lists live in data.features (get_feature_columns).
+CHAMPION_19_COLS = [
     "log_market_cap", "sma_20", "SMB", "MOM", "bb_lower", "debt_equity", "CMA",
     "sma_15", "HML", "macd_signal", "volatility_30d", "price_to_sma_20", "atr",
     "volume_trend", "RMW", "bb_middle", "eqy_turnover", "revenue_growth", "macd",
@@ -66,11 +68,19 @@ DEMEAN_WITHIN_MONTH = True
 WINSORISE_Y = True
 WINSOR_LIMITS = (0.01, 0.99)
 FILTER_MEMBERS = True
+EXCLUDE_SECTORS = {"Unknown", ""}
 TOP_K = 50
 TOP_FRAC = 0.10
 SHAP_MAX_SAMPLES = 4000  # cap TreeSHAP cost per step
 SHAP_TOP_N = 15
+SHAP_PERSIST_MIN_STEPS = 8
 COMPUTE_SHAP = True
+LAYER1_NUM_COLS = [
+    "rmse", "mae", "r2", "r2_oos",
+    "ic", "long_short", "long_short_sharpe",
+    "topk_avg_return", "topk_edge", "hit_rate",
+    "n_eval_rows", "n_months",
+]
 
 # Rolling walk-forward: train_start_year, train_end_year, eval_year
 WALK_WINDOWS = [
@@ -103,6 +113,14 @@ def _configure_paths() -> None:
         sys.path.insert(0, diss)
 
 
+class _FlushStreamHandler(logging.StreamHandler):
+    """Force each line to the console so Cursor/Windows does not swallow buffered steps."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        super().emit(record)
+        self.flush()
+
+
 def setup_logging(out_dir: Path) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     log_path = out_dir / f"walk_forward_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
@@ -118,11 +136,12 @@ def setup_logging(out_dir: Path) -> Path:
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         except Exception:
             pass
-    sh = logging.StreamHandler(sys.stdout)
+    sh = _FlushStreamHandler(sys.stdout)
     sh.setFormatter(fmt)
     logger.addHandler(fh)
     logger.addHandler(sh)
-    logger.info("Log file: %s", log_path)
+    logger.info("Log file (full 14-step record): %s", log_path)
+    print(f"FULL LOG -> {log_path}", flush=True)
     return log_path
 
 
@@ -139,6 +158,27 @@ def _filter_members(df: pd.DataFrame) -> pd.DataFrame:
     if mask.dtype != bool:
         mask = mask.astype(bool)
     return df.loc[mask].copy()
+
+
+def _drop_unknown_sector(df: pd.DataFrame) -> pd.DataFrame:
+    sec = _sector_series(df)
+    return df.loc[~sec.isin(EXCLUDE_SECTORS)].copy()
+
+
+def _layer1_nan_row(step: int, ev_year, tr0, tr1, n_eval_rows: int, status: str) -> dict:
+    row = {
+        "step": step,
+        "eval_year": ev_year,
+        "train_start": tr0,
+        "train_end": tr1,
+        "n_eval_rows": n_eval_rows,
+        "n_months": 0,
+        "status": status,
+    }
+    for c in LAYER1_NUM_COLS:
+        if c not in row:
+            row[c] = np.nan
+    return row
 
 
 def _add_model_target(train: pd.DataFrame, eval_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -288,15 +328,20 @@ def _fit_predict(
 
 
 def _step_metrics(frame: pd.DataFrame, imp: list[tuple[str, float]]) -> dict:
-    from evaluation.predictive import ranking_metrics
+    from evaluation.predictive import predictive_metrics, ranking_metrics
 
+    pm = predictive_metrics(frame["y_true"].values, frame["y_pred"].values)
     rm = ranking_metrics(frame)
-    ls = _monthly_long_short(frame)
     picks, topk = _topk_metrics(frame, k=TOP_K)
     return {
+        "rmse": pm.get("rmse"),
+        "mae": pm.get("mae"),
+        "r2": pm.get("r2"),
+        "r2_oos": pm.get("r2_oos"),
         "ic": rm.get("ic_mean"),
         "ic_std": rm.get("ic_std"),
-        "long_short": ls if ls == ls else rm.get("long_short_mean"),
+        "long_short": rm.get("long_short_mean"),
+        "long_short_sharpe": rm.get("long_short_sharpe"),
         "topk_avg_return": topk["topk_avg_return"],
         "topk_edge": topk["topk_edge"],
         "hit_rate": topk["hit_rate"],
@@ -306,6 +351,75 @@ def _step_metrics(frame: pd.DataFrame, imp: list[tuple[str, float]]) -> dict:
         "top10_importance": [{"feature": f, "importance": float(v)} for f, v in imp[:10]],
         "picks": picks,
     }
+
+
+def _write_shap_persistence(
+    shap_by_step: list[pd.Series],
+    out_dir: Path,
+    experiment_name: str,
+    feature_order: list[str] | None = None,
+    top_n: int = SHAP_TOP_N,
+    min_steps: int = SHAP_PERSIST_MIN_STEPS,
+) -> list[str]:
+    """Keep features in top-N mean|SHAP| in at least min_steps of the walk-forward steps."""
+    shap_dir = out_dir / "shap"
+    shap_dir.mkdir(parents=True, exist_ok=True)
+    if not shap_by_step:
+        log.warning("No per-step SHAP for persistence prune (%s).", experiment_name)
+        return []
+
+    counts: dict[str, int] = {}
+    n_steps = len(shap_by_step)
+    for s in shap_by_step:
+        ranked = s.sort_values(ascending=False)
+        for feat in ranked.head(top_n).index:
+            key = str(feat)
+            counts[key] = counts.get(key, 0) + 1
+
+    all_feats = list(feature_order) if feature_order else sorted({str(i) for s in shap_by_step for i in s.index})
+    seen = set(all_feats)
+    for s in shap_by_step:
+        for i in s.index:
+            if str(i) not in seen:
+                all_feats.append(str(i))
+                seen.add(str(i))
+    rows = []
+    kept: list[str] = []
+    for feat in all_feats:
+        n_hit = int(counts.get(feat, 0))
+        keep = n_hit >= min_steps
+        rows.append({
+            "feature": feat,
+            "n_steps_in_top15": n_hit,
+            "n_steps": n_steps,
+            "keep": keep,
+        })
+        if keep:
+            kept.append(feat)
+    persist = pd.DataFrame(rows).sort_values(
+        ["keep", "n_steps_in_top15", "feature"],
+        ascending=[False, False, True],
+    )
+    persist_path = shap_dir / "shap_persistence.csv"
+    persist.to_csv(persist_path, index=False)
+    pruned_path = out_dir / "pruned_features.json"
+    pruned_path.write_text(
+        json.dumps(
+            {
+                "experiment": experiment_name,
+                "rule": f"top-{top_n} mean|SHAP| in at least {min_steps} of {n_steps} steps",
+                "n_kept": len(kept),
+                "kept": kept,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    log.info(
+        "SHAP persistence %s: keep %d / %d features (top-%d in >=%d/%d steps) -> %s",
+        experiment_name, len(kept), len(all_feats), top_n, min_steps, n_steps, persist_path,
+    )
+    return kept
 
 
 def _write_shap_global(shap_by_step: list[pd.Series], out_dir: Path, experiment_name: str) -> pd.DataFrame:
@@ -353,7 +467,7 @@ def run_experiment(
     experiment_name: str,
     out_dir: Path,
     compute_shap: bool = COMPUTE_SHAP,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     shap_by_step: list[pd.Series] = []
@@ -376,20 +490,7 @@ def run_experiment(
         )
         if train.empty or eval_df.empty:
             log.warning("  SKIP empty train/eval")
-            rows.append({
-                "step": i,
-                "eval_year": ev_year,
-                "train_start": tr0,
-                "train_end": tr1,
-                "ic": np.nan,
-                "long_short": np.nan,
-                "topk_avg_return": np.nan,
-                "topk_edge": np.nan,
-                "hit_rate": np.nan,
-                "n_eval_rows": 0,
-                "n_months": 0,
-                "status": "skipped_empty",
-            })
+            rows.append(_layer1_nan_row(i, ev_year, tr0, tr1, 0, "skipped_empty"))
             continue
 
         try:
@@ -399,20 +500,7 @@ def run_experiment(
             metrics = _step_metrics(frame, imp)
         except Exception as exc:
             log.exception("  FAILED: %s", exc)
-            rows.append({
-                "step": i,
-                "eval_year": ev_year,
-                "train_start": tr0,
-                "train_end": tr1,
-                "ic": np.nan,
-                "long_short": np.nan,
-                "topk_avg_return": np.nan,
-                "topk_edge": np.nan,
-                "hit_rate": np.nan,
-                "n_eval_rows": len(eval_df),
-                "n_months": 0,
-                "status": f"error: {exc}",
-            })
+            rows.append(_layer1_nan_row(i, ev_year, tr0, tr1, len(eval_df), f"error: {exc}"))
             continue
 
         metrics_path = step_dir / "metrics.json"
@@ -427,7 +515,12 @@ def run_experiment(
             "hyperparameters": {**LOCKED_PARAMS, "n_estimators": LOCKED_N_TREES},
             "ic": metrics["ic"],
             "ic_std": metrics["ic_std"],
+            "rmse": metrics["rmse"],
+            "mae": metrics["mae"],
+            "r2": metrics["r2"],
+            "r2_oos": metrics["r2_oos"],
             "long_short": metrics["long_short"],
+            "long_short_sharpe": metrics["long_short_sharpe"],
             "topk_avg_return": metrics["topk_avg_return"],
             "topk_edge": metrics["topk_edge"],
             "hit_rate": metrics["hit_rate"],
@@ -462,9 +555,14 @@ def run_experiment(
             picks.to_csv(step_dir / "top50_picks.csv", index=False)
 
         log.info(
-            "  IC=%.4f  LS=%.4f  Top50_edge=%.4f  hit=%.1f%%  rows=%d",
+            "  RMSE=%.4f MAE=%.4f R2=%.4f R2oos=%.4f IC=%.4f LS=%.4f LSSharpe=%s Top50_edge=%.4f hit=%.1f%% rows=%d",
+            metrics["rmse"] or float("nan"),
+            metrics["mae"] or float("nan"),
+            metrics["r2"] or float("nan"),
+            metrics["r2_oos"] or float("nan"),
             metrics["ic"] or float("nan"),
             metrics["long_short"] or float("nan"),
+            ("%.3f" % metrics["long_short_sharpe"]) if metrics["long_short_sharpe"] is not None else "n/a",
             metrics["topk_edge"] or float("nan"),
             100.0 * (metrics["hit_rate"] or 0.0),
             metrics["n_eval_rows"],
@@ -475,8 +573,13 @@ def run_experiment(
             "eval_year": ev_year,
             "train_start": tr0,
             "train_end": tr1,
+            "rmse": metrics["rmse"],
+            "mae": metrics["mae"],
+            "r2": metrics["r2"],
+            "r2_oos": metrics["r2_oos"],
             "ic": metrics["ic"],
             "long_short": metrics["long_short"],
+            "long_short_sharpe": metrics["long_short_sharpe"],
             "topk_avg_return": metrics["topk_avg_return"],
             "topk_edge": metrics["topk_edge"],
             "hit_rate": metrics["hit_rate"],
@@ -488,10 +591,9 @@ def run_experiment(
         })
 
     summary = pd.DataFrame(rows)
-    num_cols = ["ic", "long_short", "topk_avg_return", "topk_edge", "hit_rate", "n_eval_rows", "n_months"]
     avg = {"step": 0, "eval_year": "AVERAGE", "train_start": "", "train_end": "", "status": "average"}
     ok = summary[summary["status"] == "ok"]
-    for c in num_cols:
+    for c in LAYER1_NUM_COLS:
         avg[c] = float(ok[c].mean()) if len(ok) and c in ok.columns else np.nan
     summary = pd.concat([summary, pd.DataFrame([avg])], ignore_index=True)
 
@@ -502,7 +604,11 @@ def run_experiment(
     log.info("Saved summary -> %s", summary_path)
 
     shap_global = _write_shap_global(shap_by_step, out_dir, experiment_name) if compute_shap else pd.DataFrame()
-    return summary, shap_global
+    kept = (
+        _write_shap_persistence(shap_by_step, out_dir, experiment_name, feature_order=feature_cols)
+        if compute_shap else []
+    )
+    return summary, shap_global, kept
 
 
 def _write_shap_comparison(base_shap: pd.DataFrame, sent_shap: pd.DataFrame, out_root: Path) -> None:
@@ -642,7 +748,12 @@ def run_final_test_style(
         "hyperparameters": {**LOCKED_PARAMS, "n_estimators": LOCKED_N_TREES},
         "ic": metrics["ic"],
         "ic_std": metrics["ic_std"],
+        "rmse": metrics["rmse"],
+        "mae": metrics["mae"],
+        "r2": metrics["r2"],
+        "r2_oos": metrics["r2_oos"],
         "long_short": metrics["long_short"],
+        "long_short_sharpe": metrics["long_short_sharpe"],
         "topk_avg_return": metrics["topk_avg_return"],
         "topk_edge": metrics["topk_edge"],
         "hit_rate": metrics["hit_rate"],
@@ -668,8 +779,14 @@ def run_final_test_style(
         "depth": LOCKED_PARAMS["max_depth"],
         "lr": LOCKED_PARAMS["learning_rate"],
         "trees": LOCKED_N_TREES,
+        "test_rmse": metrics["rmse"],
+        "test_mae": metrics["mae"],
+        "test_r2": metrics["r2"],
+        "test_r2_oos": metrics["r2_oos"],
         "test_ic": metrics["ic"],
         "test_ls": metrics["long_short"],
+        "test_ls_sharpe": metrics["long_short_sharpe"],
+        "test_topk_avg": metrics["topk_avg_return"],
         "test_topk_edge": metrics["topk_edge"],
         "test_hit_rate": metrics["hit_rate"],
         "n_test_rows": metrics["n_eval_rows"],
@@ -697,6 +814,8 @@ def _mirror_copy_to_ensemble(src_root: Path, dst_root: Path, log_path: Path | No
     for name in (
         "walk_forward_baseline",
         "walk_forward_sentiment",
+        "walk_forward_pruned_baseline",
+        "walk_forward_pruned_sentiment",
         "final_test_style_baseline",
         "final_test_style_sentiment",
     ):
@@ -712,6 +831,8 @@ def _mirror_copy_to_ensemble(src_root: Path, dst_root: Path, log_path: Path | No
     for fname in (
         "walk_forward_baseline_summary.csv",
         "walk_forward_sentiment_summary.csv",
+        "walk_forward_pruned_baseline_summary.csv",
+        "walk_forward_pruned_sentiment_summary.csv",
         "walk_forward_comparison.csv",
         "shap_baseline_vs_sentiment_comparison.csv",
         "shap_comparison_note.md",
@@ -744,28 +865,50 @@ def _mirror_copy_to_ensemble(src_root: Path, dst_root: Path, log_path: Path | No
 def _write_comparison(base: pd.DataFrame, sent: pd.DataFrame, path: Path) -> None:
     b = base[base["status"].isin(["ok", "average"])].copy()
     s = sent[sent["status"].isin(["ok", "average"])].copy()
-    b = b.rename(columns={
+    rename_b = {
+        "rmse": "baseline_rmse",
+        "mae": "baseline_mae",
+        "r2": "baseline_r2",
+        "r2_oos": "baseline_r2_oos",
         "ic": "baseline_ic",
         "long_short": "baseline_ls",
+        "long_short_sharpe": "baseline_ls_sharpe",
+        "topk_avg_return": "baseline_topk_avg",
         "topk_edge": "baseline_topk_edge",
         "hit_rate": "baseline_hit",
-    })
-    s = s.rename(columns={
+    }
+    rename_s = {
+        "rmse": "sentiment_rmse",
+        "mae": "sentiment_mae",
+        "r2": "sentiment_r2",
+        "r2_oos": "sentiment_r2_oos",
         "ic": "sentiment_ic",
         "long_short": "sentiment_ls",
+        "long_short_sharpe": "sentiment_ls_sharpe",
+        "topk_avg_return": "sentiment_topk_avg",
         "topk_edge": "sentiment_topk_edge",
         "hit_rate": "sentiment_hit",
-    })
+    }
+    b = b.rename(columns=rename_b)
+    s = s.rename(columns=rename_s)
     keys = ["step", "eval_year"]
-    m = b[keys + ["baseline_ic", "baseline_ls", "baseline_topk_edge", "baseline_hit"]].merge(
-        s[keys + ["sentiment_ic", "sentiment_ls", "sentiment_topk_edge", "sentiment_hit"]],
-        on=keys,
-        how="outer",
-    )
-    m["delta_ic"] = m["sentiment_ic"] - m["baseline_ic"]
-    m["delta_ls"] = m["sentiment_ls"] - m["baseline_ls"]
-    m["delta_topk_edge"] = m["sentiment_topk_edge"] - m["baseline_topk_edge"]
-    m["delta_hit"] = m["sentiment_hit"] - m["baseline_hit"]
+    b_cols = [c for c in rename_b.values() if c in b.columns]
+    s_cols = [c for c in rename_s.values() if c in s.columns]
+    m = b[keys + b_cols].merge(s[keys + s_cols], on=keys, how="outer")
+    for left, right, out in (
+        ("sentiment_rmse", "baseline_rmse", "delta_rmse"),
+        ("sentiment_mae", "baseline_mae", "delta_mae"),
+        ("sentiment_r2", "baseline_r2", "delta_r2"),
+        ("sentiment_r2_oos", "baseline_r2_oos", "delta_r2_oos"),
+        ("sentiment_ic", "baseline_ic", "delta_ic"),
+        ("sentiment_ls", "baseline_ls", "delta_ls"),
+        ("sentiment_ls_sharpe", "baseline_ls_sharpe", "delta_ls_sharpe"),
+        ("sentiment_topk_avg", "baseline_topk_avg", "delta_topk_avg"),
+        ("sentiment_topk_edge", "baseline_topk_edge", "delta_topk_edge"),
+        ("sentiment_hit", "baseline_hit", "delta_hit"),
+    ):
+        if left in m.columns and right in m.columns:
+            m[out] = m[left] - m[right]
     m = m.sort_values(["step"])
     path.parent.mkdir(parents=True, exist_ok=True)
     m.to_csv(path, index=False)
@@ -773,7 +916,7 @@ def _write_comparison(base: pd.DataFrame, sent: pd.DataFrame, path: Path) -> Non
 
 
 def main(argv=None) -> None:
-    p = argparse.ArgumentParser(description="XGB rolling walk-forward (baseline vs sentiment)")
+    p = argparse.ArgumentParser(description="XGB kitchen-sink rolling walk-forward (baseline vs sentiment)")
     p.add_argument("--baseline-only", action="store_true")
     p.add_argument("--sentiment-only", action="store_true")
     p.add_argument("--skip-shap", action="store_true", help="Skip TreeSHAP (faster).")
@@ -783,9 +926,19 @@ def main(argv=None) -> None:
         help="Skip 14-step rolling WF; only run final-test-style block.",
     )
     p.add_argument(
+        "--final-style",
+        action="store_true",
+        help="Also run train<=2023 -> score 2024+ (no golden lock). Off by default.",
+    )
+    p.add_argument(
         "--skip-final-style",
         action="store_true",
-        help="Skip final-test-style (train<=2023 -> score 2024+) block.",
+        help="Kept for compatibility; final-style is already off unless --final-style.",
+    )
+    p.add_argument(
+        "--skip-prune-rerun",
+        action="store_true",
+        help="Do not re-run walk-forward on SHAP-persistence pruned feature lists.",
     )
     p.add_argument(
         "--skip-ensemble-copy",
@@ -799,29 +952,48 @@ def main(argv=None) -> None:
     log_path = setup_logging(OUT_ROOT)
     warnings.filterwarnings("ignore", message="Mean of empty slice", category=RuntimeWarning)
 
-    from data.build_panel import build_panel
+    from data.build_panel import build_panel, drop_known_data_errors, KNOWN_BAD_RETURN_ROWS
+    from data.features import get_feature_columns
 
     compute_shap = not args.skip_shap
     log.info("Loading panel... | compute_shap=%s", compute_shap)
     log.info("Golden rule: this script NEVER writes GOLDEN_RULE lock files.")
     pdata, _splits = build_panel()
-    panel = _filter_members(pdata.panel.copy())
+    panel = _drop_unknown_sector(_filter_members(pdata.panel.copy()))
     panel["month"] = pd.to_datetime(panel["month"])
+    n_before_hygiene = len(panel)
+    panel = drop_known_data_errors(panel)
+    n_dropped = n_before_hygiene - len(panel)
     log.info(
-        "Panel rows=%d | months %s -> %s | members-filtered",
+        "Data hygiene: drop %s | extra rows dropped at WF filter=%d",
+        list(KNOWN_BAD_RETURN_ROWS),
+        n_dropped,
+    )
+    ais_left = int(
+        ((panel["Ticker"].astype(str) == "AIS.LN") & (panel["month"] == pd.Timestamp("2014-04-01"))).sum()
+    )
+    if ais_left:
+        raise RuntimeError("AIS.LN 2014-04 is still on the panel; RMSE 2014 would remain unusable.")
+    log.info("AIS.LN 2014-04 remaining rows=%d (required 0)", ais_left)
+    log.info(
+        "Panel rows=%d | months %s -> %s | members-filtered | Unknown sector dropped",
         len(panel),
         panel["month"].min().date(),
         panel["month"].max().date(),
     )
 
-    sent_cols = [c for c in SENTIMENT_CANDIDATES if c in panel.columns]
+    kitchen_cols = [c for c in get_feature_columns("kitchen_sink") if c in panel.columns]
+    sentiment_features = [c for c in get_feature_columns("kitchen_sink_sentiment") if c in panel.columns]
+    missing_k = [c for c in get_feature_columns("kitchen_sink") if c not in panel.columns]
+    if missing_k:
+        log.info("Kitchen-sink cols not on panel (skipped): %s", ", ".join(missing_k))
     for c in SENTIMENT_CANDIDATES:
         if c in panel.columns:
             log.info("Sentiment col %-28s non-null=%.1f%%", c, 100.0 * panel[c].notna().mean())
         else:
             log.info("Sentiment col %-28s MISSING", c)
+    log.info("Kitchen-sink n_features=%d | with sentiment=%d", len(kitchen_cols), len(sentiment_features))
 
-    sentiment_features = list(BASELINE_COLS) + sent_cols
     run_base = not args.sentiment_only
     run_sent = not args.baseline_only
 
@@ -829,18 +1001,20 @@ def main(argv=None) -> None:
     sent_summary = None
     base_shap = pd.DataFrame()
     sent_shap = pd.DataFrame()
+    base_kept: list[str] = []
+    sent_kept: list[str] = []
 
     if not args.skip_walk_forward:
         if run_base:
-            base_summary, base_shap = run_experiment(
+            base_summary, base_shap, base_kept = run_experiment(
                 panel,
-                list(BASELINE_COLS),
+                kitchen_cols,
                 "baseline",
                 OUT_ROOT / "walk_forward_baseline",
                 compute_shap=compute_shap,
             )
         if run_sent:
-            sent_summary, sent_shap = run_experiment(
+            sent_summary, sent_shap, sent_kept = run_experiment(
                 panel,
                 sentiment_features,
                 "sentiment",
@@ -852,17 +1026,44 @@ def main(argv=None) -> None:
             _write_comparison(base_summary, sent_summary, OUT_ROOT / "walk_forward_comparison.csv")
         if compute_shap and not base_shap.empty and not sent_shap.empty:
             _write_shap_comparison(base_shap, sent_shap, OUT_ROOT)
+
+        if not args.skip_prune_rerun and compute_shap:
+            if run_base and base_kept:
+                log.info("Pruned baseline re-run | n_features=%d", len(base_kept))
+                run_experiment(
+                    panel,
+                    base_kept,
+                    "pruned_baseline",
+                    OUT_ROOT / "walk_forward_pruned_baseline",
+                    compute_shap=False,
+                )
+            elif run_base:
+                log.warning("Pruned baseline skipped — no features passed persistence rule.")
+            if run_sent and sent_kept:
+                log.info("Pruned sentiment re-run | n_features=%d", len(sent_kept))
+                run_experiment(
+                    panel,
+                    sent_kept,
+                    "pruned_sentiment",
+                    OUT_ROOT / "walk_forward_pruned_sentiment",
+                    compute_shap=False,
+                )
+            elif run_sent:
+                log.warning("Pruned sentiment skipped — no features passed persistence rule.")
+        elif args.skip_prune_rerun:
+            log.info("Skipping pruned re-run (--skip-prune-rerun).")
     else:
         log.info("Skipping walk-forward (--skip-walk-forward).")
 
-    if not args.skip_final_style:
+    run_final = bool(args.final_style) and not bool(args.skip_final_style)
+    if run_final:
         log.info(
             "Running FINAL-TEST-STYLE blocks (train through 2023, score 2024-2025) — NO GOLDEN LOCK."
         )
         if run_base:
             run_final_test_style(
                 panel,
-                list(BASELINE_COLS),
+                kitchen_cols,
                 "baseline",
                 OUT_ROOT / "final_test_style_baseline",
                 compute_shap=False,
@@ -876,35 +1077,35 @@ def main(argv=None) -> None:
                 compute_shap=False,
             )
     else:
-        log.info("Skipping final-test-style (--skip-final-style).")
+        log.info("Skipping final-test-style (off by default; pass --final-style to enable).")
 
     readme = OUT_ROOT / "README_walk_forward.txt"
     readme.write_text(
         "\n".join([
-            "XGBoost rolling walk-forward (xgboost 2)",
+            "XGBoost rolling walk-forward (xgboost 2) — kitchen-sink H1",
             "=======================================",
             f"Created: {datetime.now().isoformat(timespec='seconds')}",
             f"Log: {log_path}",
             "",
             "Settings:",
-            "  Rolling 10y train / 1y eval / 1y step",
+            "  Rolling 10y train / 1y eval / 1y step (same windows as FF5/Markov)",
             "  HPs: depth=4, lr=0.03, mcw=8, trees=178",
-            "  Target: sector-neutral, winsor 1%/99%",
-            "  Liquidity filter: OFF",
+            "  Target: sector-neutral excess return, winsor 1%/99% (train bounds)",
+            "  Universe: is_member, drop Unknown sector, liquidity filter OFF",
             f"  SHAP: {'ON' if compute_shap else 'OFF'} (mean |SHAP|, max {SHAP_MAX_SAMPLES} rows/step)",
-            "",
-            "Also runs FINAL-TEST-STYLE (no golden lock):",
-            "  train months <= 2023-12, score 2024+  (same protocol as xgb_return --final-test)",
-            "  Outputs: final_test_style_baseline/ and final_test_style_sentiment/",
-            "  NEVER writes GOLDEN_RULE_test_already_scored.txt",
+            f"  Prune: top-{SHAP_TOP_N} mean|SHAP| in >= {SHAP_PERSIST_MIN_STEPS} of 14 steps",
+            "  Gu R2_oos: zero benchmark (Gu, Kelly and Xiu 2020)",
             "",
             "Folders:",
-            "  walk_forward_baseline/   — B_drop_bottom9 (19 features)",
-            "  walk_forward_sentiment/  — 19 + sentiment columns",
-            "  final_test_style_* /     — holdout refit report (no lock)",
+            "  walk_forward_baseline/          — kitchen_sink (no sentiment)",
+            "  walk_forward_sentiment/         — kitchen_sink + 5 sentiment cols",
+            "  walk_forward_pruned_baseline/   — persistence-pruned kitchen_sink",
+            "  walk_forward_pruned_sentiment/  — persistence-pruned + sentiment",
             "  walk_forward_comparison.csv",
             "  shap_baseline_vs_sentiment_comparison.csv",
-            "  shap_comparison_note.md",
+            "",
+            "Final-test-style is OFF unless --final-style.",
+            "NEVER writes GOLDEN_RULE_test_already_scored.txt",
             "",
             "Ensemble mirror copy:",
             f"  {ENSEMBLE_COPY_DIR}",

@@ -2,6 +2,8 @@
 
 Manchester Metropolitan University dissertation project: FTSE 100/250 monthly excess-return forecasting (2002–2025), comparing traditional econometric models (FF5, Markov-switching) with machine-learning approaches (XGBoost, LSTM, stacked ensemble), plus volatility and portfolio extensions in the Lab pipeline.
 
+Short map of models, tables, and graphs: [SUMMARY.md](SUMMARY.md).
+
 ---
 
 ## Repository layout
@@ -9,15 +11,18 @@ Manchester Metropolitan University dissertation project: FTSE 100/250 monthly ex
 ```
 github dessertation/
 ├── README.md
+├── SUMMARY.md                  # models, results, graphs
 ├── requirements.txt
 ├── .gitignore
+├── results/                    # aggregate tables (no firm-level panel)
+├── figures/                    # thesis and model charts
 ├── final data for AI/          # LOCAL ONLY — not pushed (Bloomberg licence)
 └── methodology/
     ├── dissertation-models/    # Lab pipeline (Tier B/C + shared data utilities)
     └── model manul code/       # Tier-A manual runners (FF5, Markov, XGB, LSTM, ensemble)
 ```
 
-> **Public repo = code only.** Place `final data for AI/` locally next to `methodology/` (see [Data setup](#data-setup-local-only)).
+> Place `final data for AI/` locally next to `methodology/` (see [Data setup](#data-setup-local-only)). Do not commit it.
 
 ### Data (`final data for AI/`)
 

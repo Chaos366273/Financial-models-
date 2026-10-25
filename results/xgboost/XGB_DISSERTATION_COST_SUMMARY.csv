@@ -1,0 +1,6 @@
+Scenario,Round-trip cost / month,Net Top-50 edge / month
+Optimistic (15 bp one-way),0.19%,1.43%
+Base (25 bp one-way),0.31%,1.31%
+Base (30 bp one-way),0.37%,1.25%
+Conservative (40 bp one-way),0.50%,1.12%
+Stress (50 bp one-way),0.62%,1.00%

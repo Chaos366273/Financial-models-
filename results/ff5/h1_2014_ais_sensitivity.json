@@ -1,0 +1,11 @@
+{
+  "ais_ticker": "AIS.LN",
+  "ais_month": "2014-04-01",
+  "dropped_for_hygiene": true,
+  "ais_n": 0,
+  "n_2014": 5533,
+  "ais_y_true": null,
+  "rmse_full": 0.10720869240331785,
+  "rmse_2014": 0.08735037287483308,
+  "note": "One observation (AIS.LN, April 2014) showed a +21,800% excess return from an unadjusted corporate action and was excluded from the panel."
+}

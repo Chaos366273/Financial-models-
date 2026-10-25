@@ -1,0 +1,4 @@
+variable,n_raw,n_missing,pct_missing
+ftse100_level,6569,0,0.0
+ret,6569,1,0.015223017202009439
+rv_30_ann,6569,30,0.45669051606028316

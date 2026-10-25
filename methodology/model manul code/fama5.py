@@ -1,16 +1,18 @@
-"""Fama–French 5-factor: predictive H1 baseline (Use B) + classic appendix (Use A).
+"""Fama–French 5-factor: H1 traditional baseline (FTSE members, Use B).
 
-Primary (default): panel OLS walk-forward on master panel
+Loads master_panel.parquet (FTSE 100/250). Does not download Bloomberg.
+
   y = target_excess_return (next-month excess)
   X = MKT_RF, SMB, HML, RMW, CMA at month t
-  Windows match xgb_walk_forward.WALK_WINDOWS (10y train → 1y eval)
+  model = panel OLS + Newey–West HAC (4 lags)
+  windows = 10y train → 1y eval (same as XGB/LSTM)
 
-Appendix:
-  python fama5.py --classic --ticker AAPL
-  Contemporaneous regression with Kenneth French US factors + Yahoo returns.
+H1 metrics scored every step (same battery as later ML models):
+  RMSE, MAE, standard R2, Gu R2_oos, Spearman IC,
+  long-short decile spread, long-short Sharpe,
+  Top-50 mean return, Top-50 edge, hit rate.
 
-Dissertation tables:
-  python fama5.py --build-h1-table
+Run: python fama5.py   or   run_fama5.bat
 """
 from __future__ import annotations
 
@@ -41,7 +43,16 @@ RESULTS_TRACKER = OUT_ROOT / "ff5_results_tracker.csv"
 
 FACTOR_COLS = ["MKT_RF", "SMB", "HML", "RMW", "CMA"]
 TARGET_COL = "target_excess_return"
+DESC_COLS = FACTOR_COLS + [TARGET_COL]
 FILTER_MEMBERS = True
+TOP_K = 50
+AIS_2014_TICKER = "AIS.LN"
+AIS_2014_MONTH = "2014-04-01"
+H1_METRIC_KEYS = [
+    "rmse", "mae", "mse", "r2", "r2_oos",
+    "ic_mean", "long_short_mean", "long_short_sharpe",
+    "topk_avg_return", "topk_edge", "hit_rate",
+]
 
 # Same windows as xgb_walk_forward.py
 WALK_WINDOWS = [
@@ -137,7 +148,7 @@ def _slice_eval_year(df: pd.DataFrame, eval_year: int) -> pd.DataFrame:
 
 def load_panel_members() -> pd.DataFrame:
     _configure_paths()
-    from data.build_panel import build_panel
+    from data.build_panel import build_panel, drop_known_data_errors, KNOWN_BAD_RETURN_ROWS
 
     pdata, _ = build_panel()
     panel = _filter_members(pdata.panel.copy())
@@ -145,6 +156,21 @@ def load_panel_members() -> pd.DataFrame:
     missing = [c for c in FACTOR_COLS + [TARGET_COL, "Ticker", "month"] if c not in panel.columns]
     if missing:
         raise ValueError(f"Panel missing required columns: {missing}")
+    n_before = len(panel)
+    panel = drop_known_data_errors(panel)
+    n_dropped = n_before - len(panel)
+    log.info(
+        "Data hygiene: drop %s | extra rows dropped at WF filter=%d",
+        list(KNOWN_BAD_RETURN_ROWS),
+        n_dropped,
+    )
+    ais_left = int(
+        ((panel["Ticker"].astype(str) == AIS_2014_TICKER)
+         & (panel["month"] == pd.Timestamp(AIS_2014_MONTH))).sum()
+    )
+    if ais_left:
+        raise RuntimeError("AIS.LN 2014-04 is still on the panel; RMSE 2014 would remain unusable.")
+    log.info("AIS.LN 2014-04 remaining rows=%d (required 0)", ais_left)
     return panel
 
 
@@ -187,34 +213,120 @@ def _fit_predict_step(train: pd.DataFrame, eval_df: pd.DataFrame) -> tuple[pd.Da
     return frame, coeffs, model
 
 
+def _blank_h1_metrics() -> dict:
+    return {k: np.nan for k in H1_METRIC_KEYS}
+
+
 def _step_metrics(frame: pd.DataFrame) -> dict:
-    from evaluation.predictive import predictive_metrics, ranking_metrics
+    from evaluation.predictive import economic_metrics, predictive_metrics, ranking_metrics
 
     pm = predictive_metrics(frame["y_true"].values, frame["y_pred"].values)
     rm = ranking_metrics(frame)
+    em = economic_metrics(frame, k=TOP_K)
     return {
         "mse": pm.get("mse"),
         "mae": pm.get("mae"),
         "rmse": pm.get("rmse"),
         "r2": pm.get("r2"),
+        "r2_oos": pm.get("r2_oos"),
         "n_obs": pm.get("n_obs"),
         "ic_mean": rm.get("ic_mean"),
         "ic_ir": rm.get("ic_ir"),
         "long_short_mean": rm.get("long_short_mean"),
-        "n_months": rm.get("n_months"),
+        "long_short_sharpe": rm.get("long_short_sharpe"),
+        "topk_avg_return": em.get("topk_avg_return"),
+        "topk_edge": em.get("topk_edge"),
+        "hit_rate": em.get("hit_rate"),
+        "n_months": rm.get("n_months") or em.get("n_months"),
+        "ranking_identified": bool(rm.get("ranking_identified") or em.get("ranking_identified")),
     }
 
 
 def pooled_metrics(df: pd.DataFrame) -> dict:
-    from evaluation.predictive import predictive_metrics, ranking_metrics
+    from evaluation.predictive import economic_metrics, predictive_metrics, ranking_metrics
 
     if df is None or df.empty:
-        return {"mse": None, "mae": None, "rmse": None, "r2": None, "n_obs": 0,
-                "ic_mean": None, "ic_ir": None, "long_short_mean": None}
+        out = _blank_h1_metrics()
+        out["n_obs"] = 0
+        out["ic_ir"] = None
+        out["n_months"] = 0
+        out["ranking_identified"] = False
+        return out
     pm = predictive_metrics(df["y_true"].values, df["y_pred"].values)
     rm = ranking_metrics(df)
-    return {**pm, "ic_mean": rm.get("ic_mean"), "ic_ir": rm.get("ic_ir"),
-            "long_short_mean": rm.get("long_short_mean"), "n_months": rm.get("n_months")}
+    em = economic_metrics(df, k=TOP_K)
+    return {
+        **pm,
+        "ic_mean": rm.get("ic_mean"),
+        "ic_ir": rm.get("ic_ir"),
+        "long_short_mean": rm.get("long_short_mean"),
+        "long_short_sharpe": rm.get("long_short_sharpe"),
+        "topk_avg_return": em.get("topk_avg_return"),
+        "topk_edge": em.get("topk_edge"),
+        "hit_rate": em.get("hit_rate"),
+        "n_months": rm.get("n_months") or em.get("n_months"),
+        "ranking_identified": bool(rm.get("ranking_identified") or em.get("ranking_identified")),
+    }
+
+
+def write_descriptive_and_pearson(panel: pd.DataFrame) -> tuple[Path, Path]:
+    """Analysis-section tables: mean/median/SD/min/max, then Pearson of factors + target."""
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    work = panel[DESC_COLS].replace([np.inf, -np.inf], np.nan).dropna()
+    rows = []
+    for col in DESC_COLS:
+        s = work[col].astype(float)
+        rows.append({
+            "variable": col,
+            "n": int(s.shape[0]),
+            "mean": float(s.mean()),
+            "median": float(s.median()),
+            "std": float(s.std(ddof=1)),
+            "min": float(s.min()),
+            "max": float(s.max()),
+        })
+    desc = pd.DataFrame(rows)
+    desc_csv = OUT_ROOT / "descriptive_stats.csv"
+    desc.to_csv(desc_csv, index=False)
+
+    pearson = work[DESC_COLS].astype(float).corr(method="pearson")
+    pear_csv = OUT_ROOT / "pearson_correlation.csv"
+    pearson.to_csv(pear_csv)
+
+    desc_md = [
+        "# Table 4.1 - Descriptive statistics (FTSE members, complete cases)",
+        "",
+        "Sample: `is_member` rows with non-missing target and five factors.",
+        f"n = {len(work):,} stock-months.",
+        "Hygiene: AIS.LN × April 2014 dropped (one stock-month; unadjusted corporate action).",
+        "",
+        "| Variable | n | Mean | Median | SD | Min | Max |",
+        "|----------|--:|-----:|-------:|---:|----:|----:|",
+    ]
+    for r in rows:
+        desc_md.append(
+            f"| {r['variable']} | {r['n']} | {_fmt(r['mean'])} | {_fmt(r['median'])} | "
+            f"{_fmt(r['std'])} | {_fmt(r['min'])} | {_fmt(r['max'])} |"
+        )
+    desc_md.extend(["", f"Source: `{desc_csv}`.", ""])
+    (OUT_ROOT / "descriptive_stats.md").write_text("\n".join(desc_md), encoding="utf-8")
+
+    pear_md = [
+        "# Table 4.2 - Pearson correlation (factors and next-month excess return)",
+        "",
+        "Pearson r between MKT_RF, SMB, HML, RMW, CMA and `target_excess_return`.",
+        "This is the pre-regression association table, not the H1 forecast test.",
+        "",
+        "|  | " + " | ".join(DESC_COLS) + " |",
+        "|--|" + "|".join(["-----:"] * len(DESC_COLS)) + "|",
+    ]
+    for idx in DESC_COLS:
+        cells = " | ".join(_fmt(pearson.loc[idx, c]) for c in DESC_COLS)
+        pear_md.append(f"| {idx} | {cells} |")
+    pear_md.extend(["", f"Source: `{pear_csv}`.", ""])
+    (OUT_ROOT / "pearson_correlation.md").write_text("\n".join(pear_md), encoding="utf-8")
+    log.info("Wrote descriptive + Pearson -> %s | %s", desc_csv, pear_csv)
+    return desc_csv, pear_csv
 
 
 def _append_tracker(row: dict) -> None:
@@ -239,12 +351,14 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
     WF_DIR.mkdir(parents=True, exist_ok=True)
     if panel is None:
         panel = load_panel_members()
+    write_descriptive_and_pearson(panel)
 
     # Note: Kenneth French Data Library does not publish a UK-only 5-factor series.
     # The Europe factors are the closest available proxy and are standard in cross-border research.
     log.info(
         "Panel rows=%d | months %s -> %s | factors=%s | "
-        "factor source: Europe FF5 proxy (no UK-only series from Kenneth French)",
+        "factor source: Europe FF5 proxy (no UK-only series from Kenneth French) | "
+        "hygiene: AIS.LN 2014-04 dropped",
         len(panel),
         panel["month"].min().date(),
         panel["month"].max().date(),
@@ -271,8 +385,8 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
             rows.append({
                 "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
                 "n_train": len(train), "n_eval": 0,
-                "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
+                **_blank_h1_metrics(),
+                "ic_ir": np.nan,
                 "status": "skipped_empty",
             })
             continue
@@ -285,8 +399,8 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
             rows.append({
                 "step": i, "eval_year": ev_year, "train_start": tr0, "train_end": tr1,
                 "n_train": len(train), "n_eval": len(eval_df),
-                "rmse": np.nan, "mae": np.nan, "mse": np.nan, "r2": np.nan,
-                "ic_mean": np.nan, "ic_ir": np.nan, "long_short_mean": np.nan,
+                **_blank_h1_metrics(),
+                "ic_ir": np.nan,
                 "status": f"error: {exc}",
             })
             continue
@@ -346,15 +460,23 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
             "mae": metrics.get("mae"),
             "mse": metrics.get("mse"),
             "r2": metrics.get("r2"),
+            "r2_oos": metrics.get("r2_oos"),
             "ic_mean": metrics.get("ic_mean"),
             "ic_ir": metrics.get("ic_ir"),
             "long_short_mean": metrics.get("long_short_mean"),
+            "long_short_sharpe": metrics.get("long_short_sharpe"),
+            "topk_avg_return": metrics.get("topk_avg_return"),
+            "topk_edge": metrics.get("topk_edge"),
+            "hit_rate": metrics.get("hit_rate"),
+            "ranking_identified": metrics.get("ranking_identified"),
             "status": "ok",
         })
         log.info(
-            "  RMSE=%.4f IC=%.4f n=%d",
+            "  RMSE=%.4f MAE=%.4f R2=%.4f R2_oos=%.4f n=%d",
             metrics.get("rmse") or float("nan"),
-            metrics.get("ic_mean") or float("nan"),
+            metrics.get("mae") or float("nan"),
+            metrics.get("r2") or float("nan"),
+            metrics.get("r2_oos") or float("nan"),
             metrics.get("n_obs") or 0,
         )
 
@@ -371,9 +493,14 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
         "mae": float(ok["mae"].mean()) if len(ok) else np.nan,
         "mse": float(ok["mse"].mean()) if len(ok) else np.nan,
         "r2": float(ok["r2"].mean()) if len(ok) else np.nan,
+        "r2_oos": float(ok["r2_oos"].mean()) if len(ok) and "r2_oos" in ok.columns else np.nan,
         "ic_mean": float(ok["ic_mean"].mean()) if len(ok) else np.nan,
         "ic_ir": float(ok["ic_ir"].mean()) if len(ok) else np.nan,
         "long_short_mean": float(ok["long_short_mean"].mean()) if len(ok) else np.nan,
+        "long_short_sharpe": float(ok["long_short_sharpe"].mean()) if len(ok) and "long_short_sharpe" in ok.columns else np.nan,
+        "topk_avg_return": float(ok["topk_avg_return"].mean()) if len(ok) and "topk_avg_return" in ok.columns else np.nan,
+        "topk_edge": float(ok["topk_edge"].mean()) if len(ok) and "topk_edge" in ok.columns else np.nan,
+        "hit_rate": float(ok["hit_rate"].mean()) if len(ok) and "hit_rate" in ok.columns else np.nan,
         "status": "average",
     }
     summary = pd.concat([summary, pd.DataFrame([avg])], ignore_index=True)
@@ -400,11 +527,11 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
 
     pm = pooled_metrics(pooled)
     log.info(
-        "POOLED OOS | RMSE=%.4f MAE=%.4f R2=%.4f IC=%.4f n=%s",
+        "POOLED OOS | RMSE=%.4f MAE=%.4f R2=%.4f R2_oos=%.4f n=%s",
         pm.get("rmse") or float("nan"),
         pm.get("mae") or float("nan"),
         pm.get("r2") or float("nan"),
-        pm.get("ic_mean") or float("nan"),
+        pm.get("r2_oos") or float("nan"),
         pm.get("n_obs"),
     )
 
@@ -415,8 +542,13 @@ def run_walk_forward_ff5(panel: pd.DataFrame | None = None) -> tuple[pd.DataFram
         "mae": pm.get("mae"),
         "mse": pm.get("mse"),
         "r2": pm.get("r2"),
+        "r2_oos": pm.get("r2_oos"),
         "ic_mean": pm.get("ic_mean"),
         "long_short_mean": pm.get("long_short_mean"),
+        "long_short_sharpe": pm.get("long_short_sharpe"),
+        "topk_avg_return": pm.get("topk_avg_return"),
+        "topk_edge": pm.get("topk_edge"),
+        "hit_rate": pm.get("hit_rate"),
         "n_obs": pm.get("n_obs"),
         "n_steps_ok": int((summary["status"] == "ok").sum()),
         "output_dir": str(WF_DIR),
@@ -534,8 +666,6 @@ def run_classic_ff5(
 # ---------------------------------------------------------------------------
 
 LS_TOP_FRAC = 0.10
-AIS_2014_TICKER = "AIS.LN"
-AIS_2014_MONTH = "2014-04-01"
 
 
 def _avg_row(summary: pd.DataFrame) -> pd.Series | None:
@@ -693,7 +823,7 @@ def _load_lstm_pooled_preview() -> pd.DataFrame:
 
 
 def _ais_sensitivity(pooled: pd.DataFrame) -> dict:
-    """Document 2014 AIS.LN extreme and RMSE with/without it."""
+    """Confirm AIS.LN April 2014 is off the H1 panel (hygiene drop)."""
     if pooled is None or pooled.empty:
         return {}
     work = pooled.copy()
@@ -703,26 +833,20 @@ def _ais_sensitivity(pooled: pd.DataFrame) -> dict:
         work["month"] == pd.Timestamp(AIS_2014_MONTH)
     )
     y14 = work[work["month"].dt.year == 2014]
-    out = {
+    return {
         "ais_ticker": AIS_2014_TICKER,
         "ais_month": AIS_2014_MONTH,
+        "dropped_for_hygiene": True,
         "ais_n": int(ais_mask.sum()),
-        "ais_y_true": _safe_float(work.loc[ais_mask, "y_true"].iloc[0]) if ais_mask.any() else None,
+        "n_2014": int(len(y14)),
+        "ais_y_true": None,
         "rmse_full": _rmse_arr(work["y_true"], work["y_pred"]),
-        "rmse_ex_ais": _rmse_arr(work.loc[~ais_mask, "y_true"], work.loc[~ais_mask, "y_pred"]),
         "rmse_2014": _rmse_arr(y14["y_true"], y14["y_pred"]) if len(y14) else None,
-        "rmse_2014_ex_ais": _rmse_arr(
-            y14.loc[~ais_mask.reindex(y14.index, fill_value=False), "y_true"],
-            y14.loc[~ais_mask.reindex(y14.index, fill_value=False), "y_pred"],
-        ) if len(y14) else None,
+        "note": (
+            "One observation (AIS.LN, April 2014) showed a +21,800% excess return "
+            "from an unadjusted corporate action and was excluded from the panel."
+        ),
     }
-    # cleaner 2014 ex-AIS
-    if len(y14):
-        y14_ex = y14[~((y14["Ticker"] == AIS_2014_TICKER) & (y14["month"] == pd.Timestamp(AIS_2014_MONTH)))]
-        out["rmse_2014_ex_ais"] = _rmse_arr(y14_ex["y_true"], y14_ex["y_pred"])
-        out["n_2014"] = int(len(y14))
-        out["n_2014_ex_ais"] = int(len(y14_ex))
-    return out
 
 
 def write_long_short_tables(
@@ -867,9 +991,13 @@ def write_h1_comparison(
             "MAE": ff5_pooled_metrics.get("mae") if ff5_pooled_metrics else None,
             "MSE": ff5_pooled_metrics.get("mse") if ff5_pooled_metrics else None,
             "R2": ff5_pooled_metrics.get("r2") if ff5_pooled_metrics else None,
-            # Cross-sectional IC/LS not identified: month-t factors are common to all stocks
-            "IC_Spearman": None,
-            "Long_short_EW": None,
+            "R2_oos": ff5_pooled_metrics.get("r2_oos") if ff5_pooled_metrics else None,
+            "IC_Spearman": ff5_pooled_metrics.get("ic_mean") if ff5_pooled_metrics else None,
+            "Long_short_EW": ff5_pooled_metrics.get("long_short_mean") if ff5_pooled_metrics else None,
+            "Long_short_Sharpe": ff5_pooled_metrics.get("long_short_sharpe") if ff5_pooled_metrics else None,
+            "Top50_mean": ff5_pooled_metrics.get("topk_avg_return") if ff5_pooled_metrics else None,
+            "Top50_edge": ff5_pooled_metrics.get("topk_edge") if ff5_pooled_metrics else None,
+            "Hit_rate": ff5_pooled_metrics.get("hit_rate") if ff5_pooled_metrics else None,
             "n_obs": n_ff5,
         },
         {
@@ -995,13 +1123,39 @@ def write_h1_comparison(
     ff = rows[0]
     xg = rows[1]
     ls = rows[2]
+    mae_mean = _safe_float(ff5_ok["mae"].mean()) if len(ff5_ok) and "mae" in ff5_ok.columns else None
+    mae_med = _safe_float(ff5_ok["mae"].median()) if len(ff5_ok) and "mae" in ff5_ok.columns else None
+    r2_mean = _safe_float(ff5_ok["r2"].mean()) if len(ff5_ok) and "r2" in ff5_ok.columns else None
+    r2_med = _safe_float(ff5_ok["r2"].median()) if len(ff5_ok) and "r2" in ff5_ok.columns else None
+    r2oos_mean = _safe_float(ff5_ok["r2_oos"].mean()) if len(ff5_ok) and "r2_oos" in ff5_ok.columns else None
+    r2oos_med = _safe_float(ff5_ok["r2_oos"].median()) if len(ff5_ok) and "r2_oos" in ff5_ok.columns else None
     md_lines = [
-        "# Table 4.x - Out-of-sample predictive accuracy (walk-forward 2012-2025)",
+        "# Table 4.x - FF5 H1 metric scorecard (walk-forward 2012-2025)",
         "",
-        "Protocol: 10-year train -> 1-year eval, annual steps; members-only master panel.",
-        "FF5: panel OLS of `target_excess_return` on MKT_RF, SMB, HML, RMW, CMA (Use B).",
-        "RMSE columns: **mean / median across evaluation years** (primary). "
-        "`n_obs` = pooled stock-months (sum of per-year counts), not the AVERAGE-row mean.",
+        "Protocol: 10-year train -> 1-year eval; FTSE members (`is_member`); master panel.",
+        "Model: panel OLS of `target_excess_return` on MKT_RF, SMB, HML, RMW, CMA.",
+        "This is the traditional **baseline**. XGB/LSTM use the same windows, target, and metric list.",
+        "",
+        "| Metric | Pooled OOS | Mean across years | Median across years |",
+        "|--------|-----------:|------------------:|--------------------:|",
+        f"| RMSE | {_fmt(ff['RMSE_pooled'])} | {_fmt(ff['RMSE_mean_year'])} | {_fmt(ff['RMSE_median_year'])} |",
+        f"| MAE | {_fmt(ff['MAE'])} | {_fmt(mae_mean)} | {_fmt(mae_med)} |",
+        f"| R² (standard) | {_fmt(ff['R2'])} | {_fmt(r2_mean)} | {_fmt(r2_med)} |",
+        f"| Gu R²_oos | {_fmt(ff['R2_oos'])} | {_fmt(r2oos_mean)} | {_fmt(r2oos_med)} |",
+        f"| Spearman IC | {_fmt(ff['IC_Spearman'])} | - | - |",
+        f"| Long-short decile | {_fmt(ff['Long_short_EW'])} | - | - |",
+        f"| Long-short Sharpe | {_fmt(ff.get('Long_short_Sharpe'))} | - | - |",
+        f"| Top-50 mean return | {_fmt(ff.get('Top50_mean'))} | - | - |",
+        f"| Top-50 edge | {_fmt(ff.get('Top50_edge'))} | - | - |",
+        f"| Hit rate | {_fmt(ff.get('Hit_rate'))} | - | - |",
+        f"| n_obs | {ff['n_obs'] if ff['n_obs'] is not None else '-'} | - | - |",
+        "",
+        "Ranking metrics (IC, long-short, Top-50, hit rate) are blank when every stock in a month "
+        "gets the same predicted return (market-wide factors). That is expected for this FF5 spec, not a crash.",
+        "Descriptive stats and Pearson: `descriptive_stats.md`, `pearson_correlation.md`.",
+        "OLS betas (each train window): `walk_forward_baseline/rolling_coefficients.csv`.",
+        "",
+        "# Table 4.x-b - Out-of-sample comparison stub (FF5 vs later models)",
         "",
         "| Model | Features | RMSE (mean yr) | RMSE (median yr) | RMSE pooled | IC (Spearman) | Long-short EW | n_obs |",
         "|-------|----------|----------------|------------------|-------------|---------------|---------------|-------|",
@@ -1023,20 +1177,18 @@ def write_h1_comparison(
         "",
         "Notes:",
         "- XGBoost walk-forward summary stores IC / long-short (not RMSE).",
-        "- FF5 and XGB share the same stock-month counts every year; LSTM is slightly smaller "
-        "(sequence length drops early history).",
+        "- FF5 and XGB share the same hygiene drop: AIS.LN × April 2014 (one stock-month).",
         "- **FF5 IC / cross-sectional long-short:** not identified under Use B with market-wide factors only "
-        "(all stocks in a month receive the same `y_pred`). Compare FF5 on RMSE; use XGB/LSTM for ranking metrics. "
-        "See `h1_long_short_decile.md` (FF5 rows marked n/a when prediction has no cross-sectional dispersion).",
+        "(all stocks in a month receive the same `y_pred`). Compare FF5 on RMSE; use XGB/LSTM for ranking metrics.",
         (
-            f"- **2014 sensitivity:** `{sens.get('ais_ticker')}` on `{sens.get('ais_month')}` has "
-            f"`target_excess_return` ≈ {_fmt(sens.get('ais_y_true'), 2)}. "
+            "- **Data hygiene:** one observation (AIS.LN, April 2014) showed a +21,800% excess return "
+            "from an unadjusted corporate action and was excluded from the panel. "
+            f"AIS remaining on OOS pooled = {sens.get('ais_n')}. "
+            f"2014 eval n = {sens.get('n_2014')}. "
             f"FF5 RMSE 2014 = {_fmt(sens.get('rmse_2014'))}; "
-            f"excluding AIS = {_fmt(sens.get('rmse_2014_ex_ais'))}. "
-            f"Pooled FF5 RMSE full = {_fmt(sens.get('rmse_full'))}; "
-            f"ex-AIS = {_fmt(sens.get('rmse_ex_ais'))}."
+            f"pooled RMSE = {_fmt(sens.get('rmse_full'))}."
         ),
-        "- Prefer **median year RMSE** for narrative robustness; pooled RMSE is dominated by AIS.LN.",
+        "- Prefer **median year RMSE** as well as pooled RMSE (no AIS spike after the drop).",
         "",
         "# Table 4.y - Walk-forward metrics by evaluation year",
         "",
@@ -1061,6 +1213,9 @@ def write_h1_comparison(
         f"- XGB summary: `{XGB_SUMMARY}`",
         f"- LSTM summary: `{LSTM_SUMMARY}`",
         f"- Long-short: `{ls_csv}`",
+        f"- Descriptive stats: `{OUT_ROOT / 'descriptive_stats.csv'}`",
+        f"- Pearson: `{OUT_ROOT / 'pearson_correlation.csv'}`",
+        f"- Rolling OLS betas: `{WF_DIR / 'rolling_coefficients.csv'}`",
         f"- 2014 diagnostics: `{OUT_ROOT / 'diagnostics'}`",
         "",
     ])
@@ -1091,26 +1246,30 @@ def write_readme(log_path: Path | None = None) -> Path:
             "  model = panel OLS (statsmodels)",
             "  windows = same as xgb_walk_forward (10y train / 1y eval)",
             "  universe = FTSE members (is_member) from master_panel.parquet",
+            "  hygiene = drop AIS.LN × 2014-04 (one stock-month; unadjusted corporate action)",
             "",
             "Commands:",
-            "  python fama5.py                  # walk-forward + H1 tables",
+            "  python fama5.py                  # walk-forward + analysis tables",
             "  python fama5.py --walk-forward   # same",
             "  python fama5.py --build-h1-table # rebuild tables from saved CSVs",
-            "  python fama5.py --classic --ticker AAPL   # Use A appendix",
+            "",
+            "Do not use --classic (Yahoo single-ticker). H1 uses FTSE master_panel only.",
+            "",
+            "H1 metrics: RMSE, MAE, R2, Gu R2_oos, Spearman IC, LS decile, LS Sharpe,",
+            "            Top-50 mean, Top-50 edge, hit rate.",
             "",
             "Outputs:",
+            "  descriptive_stats.csv / .md      # mean, median, SD, min, max",
+            "  pearson_correlation.csv / .md    # Pearson of factors + target",
             "  walk_forward_baseline/",
             "    walk_forward_baseline_summary.csv",
             "    pooled_oos_predictions.csv",
-            "    rolling_coefficients.csv      # const + factors (+ HAC SEs) across windows",
+            "    rolling_coefficients.csv      # OLS betas + HAC SEs per train window",
             "    step_XX_YYYY/preview.csv | metrics.json | coefficients.json",
-            "  dissertation_table_h1.md         # paste into dissertation",
+            "  dissertation_table_h1.md",
             "  h1_comparison_template.csv",
             "  h1_rmse_by_year.csv",
-            "  h1_long_short_decile.md/.csv     # EW + VW top/bottom 10%",
-            "  h1_2014_ais_sensitivity.json",
-            "  diagnostics/                    # 2014 plots + n_obs checks",
-            "  classic_appendix/                # Use A only",
+            "  h1_long_short_decile.md/.csv",
             "  ff5_results_tracker.csv",
             "",
             f"All FF5 artefacts root: {OUT_ROOT}",
